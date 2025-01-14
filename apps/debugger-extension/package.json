@@ -12,7 +12,9 @@
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
     "compile": "tsc --noEmit",
-    "postinstall": "wxt prepare"
+    "postinstall": "wxt prepare",
+    "format": "prettier **/*.{ts,tsx} --list-different",
+    "format:fix": "pnpm format --write"
   },
   "dependencies": {
     "react": "^19.0.0",
