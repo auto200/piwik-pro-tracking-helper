@@ -13,7 +13,7 @@
     "zip:firefox": "wxt zip -b firefox",
     "compile": "tsc --noEmit",
     "postinstall": "wxt prepare",
-    "format": "prettier **/*.{ts,tsx} --list-different",
+    "format": "prettier \"**/*.{ts,tsx}\" --list-different",
     "format:fix": "pnpm format --write"
   },
   "dependencies": {
