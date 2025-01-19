@@ -6,6 +6,7 @@ export default defineContentScript({
   runAt: 'document_start',
   main() {
     console.log('forwarder initialized');
+    browser.runtime.sendMessage('JSTC_DBG_INIT');
     window.addEventListener('message', (ev) => {
       if (ev.data.type === 'FROM_CONTENT_SCRIPT') {
         console.log('[forwarder]: forwarding message to background script', ev);

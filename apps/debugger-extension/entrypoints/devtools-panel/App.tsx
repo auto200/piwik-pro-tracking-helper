@@ -10,6 +10,11 @@ export function App() {
     port.onMessage.addListener(function (msg) {
       console.log('[panel]: Message from background script:', msg);
 
+      if (msg === 'JSTC_DBG_INIT') {
+        setMsgs([]);
+        return;
+      }
+
       setMsgs((msgs) => [...msgs, JSON.stringify(msg)]);
     });
   }, []);
