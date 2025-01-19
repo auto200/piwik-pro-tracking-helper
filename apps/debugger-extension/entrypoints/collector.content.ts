@@ -3,18 +3,28 @@ import { defineContentScript } from 'wxt/sandbox';
 // proxy object created when JSTC is loaded
 type _PaqProxy = { push: (args: unknown[]) => void };
 
-let internalPiwik: undefined | Record<string, unknown>;
-let internal_paq: undefined | unknown[] | _PaqProxy;
-
 function is_paqProxy(value: unknown): value is _PaqProxy {
   return typeof value === 'object' && value !== null && 'push' in value;
 }
+
+const sendMessage = (args: any) => {
+  window.postMessage(
+    // { type: "FROM_CONTENT_SCRIPT", data: JSON.stringify(args) },
+    { type: 'FROM_CONTENT_SCRIPT', data: args },
+    '*'
+  );
+  console.log('message posted', args);
+};
 
 export default defineContentScript({
   matches: ['<all_urls>'],
   world: 'MAIN',
   runAt: 'document_start',
   main() {
+    let internalPiwik: undefined | Record<string, unknown>;
+    let internal_paq: undefined | unknown[] | _PaqProxy;
+
+    console.log('hello');
     Object.defineProperty(window, '_paq', {
       configurable: true,
       enumerable: true,
@@ -34,9 +44,7 @@ export default defineContentScript({
           internal_paq = value;
           const originalPush = value.push;
           value.push = (args) => {
-            // TODO: forward message to debugger
-            // sendMessage(args);
-            console.log(args);
+            sendMessage(args);
             originalPush(args);
           };
           return;
@@ -61,8 +69,7 @@ export default defineContentScript({
         console.log('set called');
         if (Array.isArray(internal_paq)) {
           // TODO: send message that JSTC has been initialized
-          // window._paq.forEach((p) => sendMessage(p));
-          internal_paq?.forEach((p) => console.log(p));
+          internal_paq.forEach((p) => sendMessage(p));
         }
         internalPiwik = value;
       },
