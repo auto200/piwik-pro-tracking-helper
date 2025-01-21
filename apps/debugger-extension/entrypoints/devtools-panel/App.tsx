@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { browser } from 'wxt/browser';
 import '@/assets/tailwind.css';
+import { Separator } from '@/components/ui/separator';
 
 export function App() {
   const [msgs, setMsgs] = useState<any[]>([]);
@@ -23,9 +24,10 @@ export function App() {
   return (
     <>
       {msgs.map((msg, i) => (
-        <div key={i} className="underline">
-          {msg}
-        </div>
+        <>
+          <div key={i}>{msg}</div>
+          <Separator />
+        </>
       ))}
     </>
   );
