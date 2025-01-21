@@ -23,12 +23,23 @@ export function App() {
 
   return (
     <>
-      {msgs.map((msg, i) => (
-        <>
-          <div key={i}>{msg}</div>
-          <Separator />
-        </>
-      ))}
+      {msgs.map((msg, i) =>
+        (msg as string).includes('JSTC_LOADED') ? (
+          <div
+            key={i}
+            className="my-3"
+            title="Events until this point have been queued up and waiting for the JSTC to load to be processed"
+          >
+            <div className="font-bold text-red-400">JSTC LOADED</div>
+            <Separator className="bg-red-200" />
+          </div>
+        ) : (
+          <>
+            <div key={i}>{msg}</div>
+            <Separator />
+          </>
+        )
+      )}
     </>
   );
 }

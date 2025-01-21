@@ -41,6 +41,7 @@ export default defineContentScript({
         }
 
         if (is_paqProxy(value)) {
+          sendMessage('JSTC_LOADED');
           internal_paq = value;
           const originalPush = value.push;
           value.push = (args) => {
@@ -66,7 +67,7 @@ export default defineContentScript({
       // First thing that JSTC does after loading is setting global Piwik object,
       // when that object is defined we are sure that JSTC has loaded
       set: function (value) {
-        console.log('set called');
+        // console.log('set called', new Error()); // interesting way to see what caused the push
         if (Array.isArray(internal_paq)) {
           // TODO: send message that JSTC has been initialized
           internal_paq.forEach((p) => sendMessage(p));
