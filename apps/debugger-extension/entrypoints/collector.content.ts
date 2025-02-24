@@ -1,4 +1,5 @@
 import { defineContentScript } from 'wxt/sandbox';
+import { Message } from '@/lib/messaging';
 
 // proxy object created when JSTC is loaded
 type _PaqProxy = { push: (args: unknown[]) => void };
@@ -8,12 +9,8 @@ function is_paqProxy(value: unknown): value is _PaqProxy {
 }
 
 const sendMessage = (args: any) => {
-  window.postMessage(
-    // { type: "FROM_CONTENT_SCRIPT", data: JSON.stringify(args) },
-    { type: 'FROM_CONTENT_SCRIPT', data: args },
-    '*'
-  );
-  console.log('message posted', args);
+  const message: Message = { type: 'FROM_CONTENT_SCRIPT', payload: { data: args } };
+  window.postMessage(message, '*');
 };
 
 export default defineContentScript({
@@ -21,10 +18,8 @@ export default defineContentScript({
   world: 'MAIN',
   runAt: 'document_start',
   main() {
-    let internalPiwik: undefined | Record<string, unknown>;
     let internal_paq: undefined | unknown[] | _PaqProxy;
 
-    console.log('hello');
     Object.defineProperty(window, '_paq', {
       configurable: true,
       enumerable: true,
@@ -59,6 +54,7 @@ export default defineContentScript({
       },
     });
 
+    let internalPiwik: undefined | Record<string, unknown>;
     // JSTC initialization
     Object.defineProperty(window, 'Piwik', {
       configurable: true,

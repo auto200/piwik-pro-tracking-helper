@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { browser } from 'wxt/browser';
 import '@/assets/tailwind.css';
 import { Separator } from '@/components/ui/separator';
@@ -12,10 +12,10 @@ export function App() {
     port.onMessage.addListener(function (msg) {
       console.log('[panel]: Message from background script:', msg);
 
-      if (msg === 'JSTC_DBG_INIT') {
-        setMsgs([]);
-        return;
-      }
+      // if (msg === 'JSTC_DBG_INIT') {
+      //   setMsgs([]);
+      //   return;
+      // }
 
       setMsgs((msgs) => [...msgs, JSON.stringify(msg)]);
     });
@@ -23,6 +23,7 @@ export function App() {
 
   return (
     <>
+      <button onClick={() => setMsgs([])}>reset</button>
       {msgs.map((msg, i) =>
         (msg as string).includes('JSTC_LOADED') ? (
           <div
@@ -34,10 +35,10 @@ export function App() {
             <Separator className="bg-red-200" />
           </div>
         ) : (
-          <>
-            <div key={i}>{msg}</div>
+          <Fragment key={i}>
+            <div>{msg}</div>
             <Separator />
-          </>
+          </Fragment>
         )
       )}
     </>
