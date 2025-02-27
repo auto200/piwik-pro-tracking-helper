@@ -1,3 +1,4 @@
+import { Message } from '@/lib/messaging';
 import { browser, Runtime } from 'wxt/browser';
 import { defineBackground } from 'wxt/sandbox';
 
@@ -6,7 +7,9 @@ export default defineBackground(() => {
   let devToolsPort: Runtime.Port | undefined;
   const queue: unknown[] = [];
   // from forwarder
-  browser.runtime.onMessage.addListener((request): undefined => {
+  // @ts-expect-error lol
+  browser.runtime.onMessage.addListener((request: Message | undefined): undefined => {
+    if (request?.source !== 'JSTC_DBG') return;
     console.log('[background]: message received:', request);
     if (!devToolsPort) {
       console.log('[background]: adding to queue');

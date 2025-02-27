@@ -8,9 +8,8 @@ function is_paqProxy(value: unknown): value is _PaqProxy {
   return typeof value === 'object' && value !== null && 'push' in value;
 }
 
-const sendMessage = (args: any) => {
-  const message: Message = { type: 'FROM_CONTENT_SCRIPT', payload: { data: args } };
-  window.postMessage(message, '*');
+const sendMessage = (msg: Message) => {
+  window.postMessage(msg, '*');
 };
 
 export default defineContentScript({
@@ -36,11 +35,19 @@ export default defineContentScript({
         }
 
         if (is_paqProxy(value)) {
-          sendMessage('JSTC_LOADED');
+          const message: Message = { type: 'JSTC_LOADED', source: 'JSTC_DBG' };
+
+          sendMessage(message);
           internal_paq = value;
           const originalPush = value.push;
           value.push = (args) => {
-            sendMessage(args);
+            const message: Message = {
+              type: 'PAQ_ENTRY',
+              source: 'JSTC_DBG',
+              payload: { data: args as any },
+            };
+
+            sendMessage(message);
             originalPush(args);
           };
           return;
@@ -66,7 +73,14 @@ export default defineContentScript({
         // console.log('set called', new Error()); // interesting way to see what caused the push
         if (Array.isArray(internal_paq)) {
           // TODO: send message that JSTC has been initialized
-          internal_paq.forEach((p) => sendMessage(p));
+          internal_paq.forEach((p) => {
+            const message: Message = {
+              source: 'JSTC_DBG',
+              type: 'PAQ_ENTRY',
+              payload: { data: p as any },
+            };
+            sendMessage(message);
+          });
         }
         internalPiwik = value;
       },

@@ -7,7 +7,7 @@ export default defineContentScript({
   runAt: 'document_start',
   main() {
     window.addEventListener('message', (ev: MessageEvent<Message>) => {
-      if (ev.data.type === 'FROM_CONTENT_SCRIPT') {
+      if (ev.data.source === 'JSTC_DBG') {
         browser.runtime.sendMessage(ev.data);
       }
     });
