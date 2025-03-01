@@ -1,7 +1,4 @@
-type QueryParam = {
-  name: string;
-  value: string;
-};
+import { QueryParam } from './types';
 
 export function getEventType(eventParams: QueryParam[]) {
   if (isGoalConversion(eventParams)) return 'Goal Conversion';
