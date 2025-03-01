@@ -44,7 +44,9 @@ export default defineContentScript({
             const message: Message = {
               type: 'PAQ_ENTRY',
               source: 'JSTC_DBG',
-              payload: { data: args as any },
+              payload: {
+                data: args.map((e) => (typeof e === 'function' ? e.toString() : e)) as any,
+              },
             };
 
             sendMessage(message);
