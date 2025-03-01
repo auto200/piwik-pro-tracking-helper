@@ -11,8 +11,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { getEventType } from '@/lib/eventDetector';
-import { ArrowRight, ArrowUpDown } from 'lucide-react';
+import { ArrowRight, ArrowUpDown, CircleX } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 export function App() {
   const [msgs, setMsgs] = useState<Message[]>([]);
@@ -29,7 +30,10 @@ export function App() {
 
   return (
     <>
-      <button onClick={() => setMsgs([])}>reset</button>
+      <Button variant="outline" onClick={() => setMsgs([])}>
+        <CircleX />
+        <span>reset</span>
+      </Button>
       <Table>
         <TableHeader>
           <TableRow>
