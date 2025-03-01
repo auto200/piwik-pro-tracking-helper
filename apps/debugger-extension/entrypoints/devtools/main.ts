@@ -25,7 +25,7 @@ browser.devtools.network.onRequestFinished.addListener((request: any) => {
     const msg: Message = {
       source: 'JSTC_DBG',
       type: 'NETWORK_EVENT',
-      payload: { url: request.request.url, params: request.request.postData.params },
+      payload: { url: request.request.url, params: request.request.postData?.params ?? [] },
     };
     if (port) {
       postMessage(msg);

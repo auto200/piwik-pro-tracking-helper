@@ -1,6 +1,38 @@
 import { QueryParam } from './types';
+type BrokenEvent = 'Broken Event';
+type PingType =
+  | 'HeartBeat'
+  | 'Deanonymization'
+  | 'Page performance metric'
+  | 'Custom'
+  | BrokenEvent;
+type EventType =
+  | 'Goal Conversion'
+  | 'Ping'
+  | 'Download'
+  | 'Outlink'
+  | 'Consent form impression'
+  | 'Consent form click'
+  | 'Consent decision'
+  | 'SharePoint'
+  | 'Custom event'
+  | 'Content interaction'
+  | 'Content impression'
+  | 'Cart update'
+  | 'Product detail view'
+  | 'Add to cart'
+  | 'Remove from cart'
+  | 'Order completed'
+  | 'Internal search'
+  | 'Page view'
+  | PingType
+  | BrokenEvent;
+/**
+ * https://help.piwik.pro/support/questions/what-are-events-and-how-are-they-detected/
+ */
+export function getEventType(eventParams: QueryParam[]): EventType {
+  if (isBrokenEvent(eventParams)) return 'Broken Event';
 
-export function getEventType(eventParams: QueryParam[]) {
   if (isGoalConversion(eventParams)) return 'Goal Conversion';
 
   if (isPing(eventParams)) return getPingType(eventParams);
@@ -36,6 +68,11 @@ export function getEventType(eventParams: QueryParam[]) {
   if (isInternalSearch(eventParams)) return 'Internal search';
 
   return 'Page view';
+}
+
+function isBrokenEvent(eventParams: QueryParam[]) {
+  // TODO: validate if idsite and idgoal are in the proper format
+  return !eventParams.some((p) => p.name === 'idsite');
 }
 
 function isGoalConversion(eventParams: QueryParam[]) {

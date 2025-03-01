@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/table';
 import { getEventType } from '@/lib/eventDetector';
 import { ArrowRight, ArrowUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export function App() {
   const [msgs, setMsgs] = useState<Message[]>([]);
@@ -37,25 +38,30 @@ export function App() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {msgs.map((msg) => {
+          {msgs.map((msg, i) => {
             switch (msg.type) {
               case 'JSTC_LOADED': {
                 return (
-                  <TableRow>
-                    <TableCell colSpan={2} className="font-semibold text-red-400">
+                  <TableRow key={i}>
+                    <TableCell colSpan={2} className="font-semibold text-purple-500">
                       JSTC LOADED
                     </TableCell>
                   </TableRow>
                 );
               }
               case 'NETWORK_EVENT': {
+                const eventType = getEventType(msg.payload.params);
                 return (
-                  <TableRow>
+                  <TableRow key={i}>
                     <TableCell className="flex items-center gap-1">
                       <span>
                         <ArrowUpDown className="text-blue-300" size={18} />
                       </span>{' '}
-                      <span>{getEventType(msg.payload.params)}</span>
+                      <span
+                        className={cn(eventType === 'Broken Event' && 'font-bold text-red-600')}
+                      >
+                        {eventType}
+                      </span>
                     </TableCell>
                     <TableCell>{msg.payload.url}</TableCell>
                   </TableRow>
@@ -64,7 +70,7 @@ export function App() {
               case 'PAQ_ENTRY': {
                 const params = msg.payload.data.slice(1, msg.payload.data.length);
                 return (
-                  <TableRow>
+                  <TableRow key={i}>
                     <TableCell className="flex items-center gap-1">
                       <span>
                         <ArrowRight className="text-green-300 opacity-80" size={18} />
@@ -83,23 +89,6 @@ export function App() {
           })}
         </TableBody>
       </Table>
-      {/* {msgs.map((msg, i) =>
-        (msg as string).includes('JSTC_LOADED') ? (
-          <div
-            key={i}
-            className="my-3"
-            title="Events until this point have been queued up and waiting for the JSTC to load to be processed"
-          >
-            <div className="font-bold text-red-400">JSTC LOADED</div>
-            <Separator className="bg-red-200" />
-          </div>
-        ) : (
-          <Fragment key={i}>
-            <div>{msg}</div>
-            <Separator />
-          </Fragment>
-        )
-      )} */}
     </>
   );
 }
