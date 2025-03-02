@@ -1,7 +1,11 @@
 import { QueryParam } from './types';
 
 export type Message =
-  | { type: 'PAQ_ENTRY'; source: 'JSTC_DBG'; payload: { data: [string, ...unknown[]] } }
+  | {
+      type: 'PAQ_ENTRY';
+      source: 'JSTC_DBG';
+      payload: { data: [string, ...unknown[]]; stack: string | undefined };
+    }
   | {
       type: 'NETWORK_EVENT';
       source: 'JSTC_DBG';

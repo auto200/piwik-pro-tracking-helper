@@ -74,7 +74,16 @@ export function App() {
               case 'PAQ_ENTRY': {
                 const params = msg.payload.data.slice(1, msg.payload.data.length);
                 return (
-                  <TableRow key={i}>
+                  <TableRow
+                    key={i}
+                    // onClick={() => {
+                    //   browser.devtools.panels.openResource(
+                    //     'chrome-extension://lheofohbkhphjehlmohenmocgcojbalm/content-scripts/collector.js',
+                    //     67,
+                    //     44
+                    //   );
+                    // }}
+                  >
                     <TableCell className="flex items-center gap-1">
                       <span>
                         <ArrowRight className="text-green-300 opacity-80" size={18} />

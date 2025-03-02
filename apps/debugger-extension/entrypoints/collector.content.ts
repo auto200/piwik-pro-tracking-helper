@@ -46,6 +46,7 @@ export default defineContentScript({
               source: 'JSTC_DBG',
               payload: {
                 data: args.map((e) => (typeof e === 'function' ? e.toString() : e)) as any,
+                stack: new Error().stack,
               },
             };
 
@@ -79,7 +80,7 @@ export default defineContentScript({
             const message: Message = {
               source: 'JSTC_DBG',
               type: 'PAQ_ENTRY',
-              payload: { data: p as any },
+              payload: { data: p as any, stack: new Error().stack },
             };
             sendMessage(message);
           });
