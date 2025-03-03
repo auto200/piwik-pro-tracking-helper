@@ -11,12 +11,15 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { getEventType } from '@/lib/eventDetector';
-import { ArrowRight, ArrowUpDown, CircleX } from 'lucide-react';
+import { ArrowRight, ArrowUpDown, CircleX, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
+type Entry = Message & { id: string };
+
 export function App() {
-  const [msgs, setMsgs] = useState<Message[]>([]);
+  const [msgs, setMsgs] = useState<Entry[]>([]);
+  const [selectedMessage, setSelectedMessage] = useState<Entry | undefined>();
 
   useEffect(() => {
     const port = browser.runtime.connect({ name: 'devtools' });
@@ -24,13 +27,38 @@ export function App() {
     port.onMessage.addListener(function (msg) {
       console.log('[panel]: Message from background script:', msg);
 
-      setMsgs((msgs) => [...msgs, msg as Message]);
+      setMsgs((msgs) => [...msgs, { ...(msg as any), id: crypto.randomUUID() }]);
     });
+
+    const abortController = new AbortController();
+    document.addEventListener(
+      'keydown',
+      (e) => {
+        console.log(e.key);
+        if (e.key === 'Escape' || e.key === '`') {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          setSelectedMessage(undefined);
+        }
+      },
+      { signal: abortController.signal }
+    );
+
+    return () => {
+      abortController.abort();
+    };
   }, []);
 
   return (
-    <>
-      <Button variant="outline" onClick={() => setMsgs([])}>
+    <div className="relative">
+      <Button
+        variant="outline"
+        onClick={() => {
+          setMsgs([]);
+          setSelectedMessage(undefined);
+        }}
+      >
         <CircleX />
         <span>reset</span>
       </Button>
@@ -56,7 +84,7 @@ export function App() {
               case 'NETWORK_EVENT': {
                 const eventType = getEventType(msg.payload.params);
                 return (
-                  <TableRow key={i}>
+                  <TableRow key={i} onClick={() => setSelectedMessage(msg)}>
                     <TableCell className="flex items-center gap-1">
                       <span>
                         <ArrowUpDown className="text-blue-300" size={18} />
@@ -76,6 +104,7 @@ export function App() {
                 return (
                   <TableRow
                     key={i}
+                    onClick={() => setSelectedMessage(msg)}
                     // onClick={() => {
                     //   browser.devtools.panels.openResource(
                     //     'chrome-extension://lheofohbkhphjehlmohenmocgcojbalm/content-scripts/collector.js',
@@ -102,6 +131,45 @@ export function App() {
           })}
         </TableBody>
       </Table>
-    </>
+      {selectedMessage && (
+        <div className="absolute right-0 top-0 h-full w-72 bg-red-200">
+          <div className="my-2 flex">
+            <Button
+              className="ml-auto"
+              variant="ghost"
+              size="icon"
+              onClick={() => setSelectedMessage(undefined)}
+            >
+              <XCircle />
+            </Button>
+          </div>
+          {selectedMessage.type === 'PAQ_ENTRY' ? (
+            <>
+              <div>
+                Event name <span className="font-bold">{selectedMessage.payload.data[0]}</span>
+              </div>
+              <div>
+                parameters:{' '}
+                {JSON.stringify(
+                  selectedMessage.payload.data.slice(1, selectedMessage.payload.data.length)
+                )}
+              </div>
+            </>
+          ) : selectedMessage.type === 'NETWORK_EVENT' ? (
+            <div>
+              network event:{' '}
+              <span className="font-bold">{getEventType(selectedMessage.payload.params)}</span>
+              <div>
+                {selectedMessage.payload.params.map((e, i) => (
+                  <div key={i}>
+                    {e.name}: <span className="font-bold">{e.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      )}
+    </div>
   );
 }
