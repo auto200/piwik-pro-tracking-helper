@@ -84,7 +84,13 @@ export function App() {
               case 'NETWORK_EVENT': {
                 const eventType = getEventType(msg.payload.params);
                 return (
-                  <TableRow key={i} onClick={() => setSelectedMessage(msg)}>
+                  <TableRow
+                    key={i}
+                    onClick={() => setSelectedMessage(msg)}
+                    className={cn('cursor-default', {
+                      'bg-slate-300 hover:bg-slate-300': selectedMessage?.id === msg.id,
+                    })}
+                  >
                     <TableCell className="flex items-center gap-1">
                       <span>
                         <ArrowUpDown className="text-blue-300" size={18} />
@@ -105,6 +111,10 @@ export function App() {
                   <TableRow
                     key={i}
                     onClick={() => setSelectedMessage(msg)}
+                    className={cn('cursor-default', {
+                      'bg-slate-300 hover:bg-slate-300': selectedMessage?.id === msg.id,
+                    })}
+
                     // onClick={() => {
                     //   browser.devtools.panels.openResource(
                     //     'chrome-extension://lheofohbkhphjehlmohenmocgcojbalm/content-scripts/collector.js',
@@ -153,6 +163,15 @@ export function App() {
                 {JSON.stringify(
                   selectedMessage.payload.data.slice(1, selectedMessage.payload.data.length)
                 )}
+              </div>
+              <div className='mt-2'>
+                <div className='font-bold'>Why was this event triggered?</div>
+                <pre>
+                  {selectedMessage.payload.stack
+                    ?.split('\n')
+                    .slice(1, selectedMessage.payload.stack.split('\n').length)
+                    .join('\n')}
+                </pre>
               </div>
             </>
           ) : selectedMessage.type === 'NETWORK_EVENT' ? (
