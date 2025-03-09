@@ -1,3 +1,20 @@
+# TODO
+
+- support for \_paq & \_ppms
+- support for custom tracking endpoint
+- scope events to specific page
+- filters
+- support for batch network requests
+- payload validation for events and network events
+- grouping parameters in network event details
+- settings & persistence
+- support for viewing direct method calls on tracker object
+- formatting and syntax highlighting for functions - pushed to queue and to methods like `setCustomRequestProcessing`
+- notification about new version updates of the extension <!-- https://api.github.com/repos/auto200/piwik-pro-jstc-debugger/releases/latest -->
+- playwright tests
+- refactor components
+- setup eslint
+
 # Turborepo starter
 
 This is an official starter Turborepo.
