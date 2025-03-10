@@ -127,7 +127,8 @@ export function App() {
                           <TableCell className="flex items-center gap-1">
                             <span>
                               <ArrowUpDown className="text-green-700" size={18} />
-                            </span>{' '}
+                            </span>
+                            {'_paq '}
                             <span
                               className={cn(
                                 eventType === 'Broken Event' && 'font-bold text-red-600'
@@ -154,7 +155,7 @@ export function App() {
                             <span>
                               <ArrowUpDown className="text-purple-700" size={18} />
                             </span>
-                            {'PPAS '}
+                            {'_ppas '}
                             <span
                               className={cn(
                                 eventType === 'Broken Event' && 'font-bold text-red-600'
@@ -279,6 +280,13 @@ export function App() {
                     <span className="font-bold">
                       {getEventType(selectedMessage.payload.params)}
                     </span>
+                    {getEventType(selectedMessage.payload.params) === 'Broken Event' &&
+                      selectedMessage.payload.params.length == 0 && (
+                        <div className="mt-2 font-bold">
+                          This may be Last heartbeat ping, these are currently not supported and
+                          displayed as broken events.
+                        </div>
+                      )}
                     <div>
                       {selectedMessage.payload.params.map((e, i) => (
                         <div key={i}>

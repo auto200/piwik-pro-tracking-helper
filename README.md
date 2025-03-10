@@ -6,6 +6,8 @@
 - support for batch network requests
 - payload validation for events and network events
 - grouping parameters in network event details
+- better display of parameters
+- highlight significant params that contributed to event detection https://help.piwik.pro/support/questions/what-are-events-and-how-are-they-detected/#how-event-types-are-detected
 - settings & persistence
 - show total number of events and network events
 - autoscrolling event list upon new event
