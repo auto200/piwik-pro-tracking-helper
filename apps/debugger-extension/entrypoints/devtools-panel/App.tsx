@@ -87,7 +87,7 @@ export function App() {
         <Panel order={1} minSize={25}>
           <div className="h-full overflow-auto">
             <Table>
-              <TableHeader>
+              <TableHeader className="sticky top-0 z-10 bg-slate-100">
                 <TableRow>
                   <TableHead>Event name</TableHead>
                   <TableHead>Payload</TableHead>
@@ -245,57 +245,59 @@ export function App() {
           <>
             <PanelResizeHandle className="basis-[0.15rem] bg-slate-400" />
             <Panel order={2}>
-              <div className="h-full overflow-auto bg-red-200 p-2">
-                <div className="flex">
+              <div className="h-full overflow-auto bg-red-200">
+                <div className="sticky top-0 border-b-2 border-slate-300 bg-red-200">
                   <Button variant="ghost" size="icon" onClick={() => setSelectedMessage(undefined)}>
                     <XCircle />
                   </Button>
                 </div>
-                {selectedMessage.type === 'PAQ_ENTRY' || selectedMessage.type === 'PPAS_ENTRY' ? (
-                  <>
+                <div className="p-2">
+                  {selectedMessage.type === 'PAQ_ENTRY' || selectedMessage.type === 'PPAS_ENTRY' ? (
+                    <>
+                      <div>
+                        Event name{' '}
+                        <span className="font-bold">{selectedMessage.payload.data[0]}</span>
+                      </div>
+                      <div>
+                        parameters:{' '}
+                        {JSON.stringify(
+                          selectedMessage.payload.data.slice(1, selectedMessage.payload.data.length)
+                        )}
+                      </div>
+                      <div className="mt-2">
+                        <div className="font-bold">Why was this event triggered?</div>
+                        <pre>
+                          {selectedMessage.payload.stack
+                            ?.split('\n')
+                            .slice(1, selectedMessage.payload.stack.split('\n').length)
+                            .join('\n')}
+                        </pre>
+                      </div>
+                    </>
+                  ) : selectedMessage.type === 'PAQ_NETWORK_EVENT' ||
+                    selectedMessage.type === 'PPAS_NETWORK_EVENT' ? (
                     <div>
-                      Event name{' '}
-                      <span className="font-bold">{selectedMessage.payload.data[0]}</span>
+                      network event:{' '}
+                      <span className="font-bold">
+                        {getEventType(selectedMessage.payload.params)}
+                      </span>
+                      {getEventType(selectedMessage.payload.params) === 'Broken Event' &&
+                        selectedMessage.payload.params.length == 0 && (
+                          <div className="mt-2 font-bold">
+                            This may be Last heartbeat ping, these are currently not supported and
+                            displayed as broken events.
+                          </div>
+                        )}
+                      <div>
+                        {selectedMessage.payload.params.map((e, i) => (
+                          <div key={i}>
+                            {e.name}: <span className="font-bold">{e.value}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <div>
-                      parameters:{' '}
-                      {JSON.stringify(
-                        selectedMessage.payload.data.slice(1, selectedMessage.payload.data.length)
-                      )}
-                    </div>
-                    <div className="mt-2">
-                      <div className="font-bold">Why was this event triggered?</div>
-                      <pre>
-                        {selectedMessage.payload.stack
-                          ?.split('\n')
-                          .slice(1, selectedMessage.payload.stack.split('\n').length)
-                          .join('\n')}
-                      </pre>
-                    </div>
-                  </>
-                ) : selectedMessage.type === 'PAQ_NETWORK_EVENT' ||
-                  selectedMessage.type === 'PPAS_NETWORK_EVENT' ? (
-                  <div>
-                    network event:{' '}
-                    <span className="font-bold">
-                      {getEventType(selectedMessage.payload.params)}
-                    </span>
-                    {getEventType(selectedMessage.payload.params) === 'Broken Event' &&
-                      selectedMessage.payload.params.length == 0 && (
-                        <div className="mt-2 font-bold">
-                          This may be Last heartbeat ping, these are currently not supported and
-                          displayed as broken events.
-                        </div>
-                      )}
-                    <div>
-                      {selectedMessage.payload.params.map((e, i) => (
-                        <div key={i}>
-                          {e.name}: <span className="font-bold">{e.value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
+                  ) : null}
+                </div>
               </div>
             </Panel>
           </>
