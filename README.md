@@ -11,6 +11,7 @@
 - settings & persistence
 - show total number of events and network events
 - autoscrolling event list upon new event
+- left and right panel headers should be fixed, lef panel column names and right panel close button should always be visible even if panel is scrolled
 - icon next to network events like in tracker debugger
 - events order - newest/oldest first
 - support for viewing direct method calls on tracker object
