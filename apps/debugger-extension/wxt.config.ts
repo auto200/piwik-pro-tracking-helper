@@ -10,7 +10,7 @@ export default defineConfig({
   },
   // https://wxt.dev/api/reference/wxt/interfaces/ExtensionRunnerConfig.html
   runner: {
-    startUrls: ['https://tiki-toki.vercel.app'],
+    startUrls: ['https://help.piwik.pro'],
     chromiumArgs: ['--auto-open-devtools-for-tabs'],
     // openDevtools: true, //firefox only! - background script devtools
   },

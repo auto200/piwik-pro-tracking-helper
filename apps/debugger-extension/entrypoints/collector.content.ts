@@ -2,9 +2,9 @@ import { defineContentScript } from 'wxt/sandbox';
 import { Message } from '@/lib/messaging';
 
 // proxy object created when JSTC is loaded
-type _PaqProxy = { push: (args: unknown[]) => void };
+type _QueueProxy = { push: (args: unknown[]) => void };
 
-function is_paqProxy(value: unknown): value is _PaqProxy {
+function is_queueProxy(value: unknown): value is _QueueProxy {
   return typeof value === 'object' && value !== null && 'push' in value;
 }
 
@@ -17,79 +17,109 @@ export default defineContentScript({
   world: 'MAIN',
   runAt: 'document_start',
   main() {
-    let internal_paq: undefined | unknown[] | _PaqProxy;
+    function registerQueueListener({
+      queueName,
+      loadedEventType,
+      messageEventType,
+      objectName,
+    }: {
+      queueName: '_paq' | '_ppas';
+      loadedEventType: 'JSTC_LOADED_PAQ' | 'JSTC_LOADED_PPAS';
+      messageEventType: 'PAQ_ENTRY' | 'PPAS_ENTRY';
+      objectName: 'Piwik' | 'PPAS';
+    }) {
+      let internal_queue: undefined | unknown[] | _QueueProxy;
 
-    Object.defineProperty(window, '_paq', {
-      configurable: true,
-      enumerable: true,
+      Object.defineProperty(window, queueName, {
+        configurable: true,
+        enumerable: true,
 
-      set: function (value) {
-        // ignore reassignment `_paq = _paq || []`
-        if (internal_paq === value) {
-          return;
-        }
-        // initialization `_paq = []`
-        if (Array.isArray(value)) {
-          internal_paq = value;
-          return;
-        }
+        set: function (value) {
+          // ignore reassignment `_paq = _paq || []`
+          if (internal_queue === value) {
+            return;
+          }
+          // initialization `_paq = []`
+          if (Array.isArray(value)) {
+            internal_queue = value;
+            return;
+          }
 
-        if (is_paqProxy(value)) {
-          const message: Message = { type: 'JSTC_LOADED', source: 'JSTC_DBG' };
-
-          sendMessage(message);
-          internal_paq = value;
-          const originalPush = value.push;
-          value.push = (args) => {
-            const message: Message = {
-              type: 'PAQ_ENTRY',
-              source: 'JSTC_DBG',
-              payload: {
-                data: args.map((e) => (typeof e === 'function' ? e.toString() : e)) as any,
-                stack: new Error().stack,
-              },
-            };
+          if (is_queueProxy(value)) {
+            const message: Message = { type: loadedEventType, source: 'JSTC_DBG' };
 
             sendMessage(message);
-            originalPush(args);
-          };
-          return;
-        }
-        console.log('some bogus amogus value:', value);
+            internal_queue = value;
+            const originalPush = value.push;
+            value.push = (args) => {
+              if (!Array.isArray(args)) {
+                console.log(`[JSTC DEBUGGER] some invalid value pushed to the ${queueName}`);
+              } else {
+                const message: Message = {
+                  type: messageEventType,
+                  source: 'JSTC_DBG',
+                  payload: {
+                    data: args.map((e) => (typeof e === 'function' ? e.toString() : e)) as any,
+                    stack: new Error().stack,
+                  },
+                };
 
-        internal_paq = value;
-      },
-      get: function () {
-        return internal_paq;
-      },
+                sendMessage(message);
+              }
+              originalPush(args);
+            };
+            return;
+          }
+          console.log(`some bogus amogus value assigned to "${queueName}":`, value);
+
+          internal_queue = value;
+        },
+        get: function () {
+          return internal_queue;
+        },
+      });
+
+      let internalObjectName: undefined | Record<string, unknown>;
+      // JSTC initialization
+      Object.defineProperty(window, objectName, {
+        configurable: true,
+        enumerable: true,
+
+        // First thing that JSTC does after loading is setting global Piwik object,
+        // when that object is defined we are sure that JSTC has loaded
+        set: function (value) {
+          // console.log('set called', new Error()); // interesting way to see what caused the push
+          if (Array.isArray(internal_queue)) {
+            // TODO: send message that JSTC has been initialized
+            internal_queue.forEach((p) => {
+              const message: Message = {
+                source: 'JSTC_DBG',
+                type: messageEventType,
+                payload: { data: p as any, stack: new Error().stack },
+              };
+              sendMessage(message);
+            });
+          }
+          internalObjectName = value;
+        },
+        get: function () {
+          return internalObjectName;
+        },
+      });
+    }
+
+    registerQueueListener({
+      queueName: '_paq',
+      loadedEventType: 'JSTC_LOADED_PAQ',
+      messageEventType: 'PAQ_ENTRY',
+      objectName: 'Piwik',
     });
 
-    let internalPiwik: undefined | Record<string, unknown>;
-    // JSTC initialization
-    Object.defineProperty(window, 'Piwik', {
-      configurable: true,
-      enumerable: true,
-
-      // First thing that JSTC does after loading is setting global Piwik object,
-      // when that object is defined we are sure that JSTC has loaded
-      set: function (value) {
-        // console.log('set called', new Error()); // interesting way to see what caused the push
-        if (Array.isArray(internal_paq)) {
-          // TODO: send message that JSTC has been initialized
-          internal_paq.forEach((p) => {
-            const message: Message = {
-              source: 'JSTC_DBG',
-              type: 'PAQ_ENTRY',
-              payload: { data: p as any, stack: new Error().stack },
-            };
-            sendMessage(message);
-          });
-        }
-        internalPiwik = value;
-      },
-      get: function () {
-        return internalPiwik;
-      },
+    registerQueueListener({
+      queueName: '_ppas',
+      loadedEventType: 'JSTC_LOADED_PPAS',
+      messageEventType: 'PPAS_ENTRY',
+      objectName: 'PPAS',
     });
   },
 });

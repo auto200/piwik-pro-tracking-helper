@@ -21,16 +21,29 @@ browser.runtime.onConnect.addListener((p) => {
 });
 
 browser.devtools.network.onRequestFinished.addListener((request: any) => {
+  let msg: Message | undefined;
+
   if (request.request.url.endsWith('ppms.php')) {
-    const msg: Message = {
+    msg = {
       source: 'JSTC_DBG',
-      type: 'NETWORK_EVENT',
+      type: 'PAQ_NETWORK_EVENT',
       payload: { url: request.request.url, params: request.request.postData?.params ?? [] },
     };
-    if (port) {
-      postMessage(msg);
-    } else {
-      queue.push(msg);
-    }
+  }
+
+  if (request.request.url.endsWith('piwik.php')) {
+    msg = {
+      source: 'JSTC_DBG',
+      type: 'PPAS_NETWORK_EVENT',
+      payload: { url: request.request.url, params: request.request.postData?.params ?? [] },
+    };
+  }
+
+  if (!msg) return;
+
+  if (port) {
+    postMessage(msg);
+  } else {
+    queue.push(msg);
   }
 });

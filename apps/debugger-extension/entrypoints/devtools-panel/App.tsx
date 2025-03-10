@@ -96,16 +96,25 @@ export function App() {
               <TableBody>
                 {msgs.map((msg, i) => {
                   switch (msg.type) {
-                    case 'JSTC_LOADED': {
+                    case 'JSTC_LOADED_PAQ': {
                       return (
                         <TableRow key={i}>
-                          <TableCell colSpan={2} className="font-semibold text-purple-500">
-                            JSTC LOADED
+                          <TableCell colSpan={2} className="font-semibold text-green-600">
+                            JSTC LOADED (_paq)
                           </TableCell>
                         </TableRow>
                       );
                     }
-                    case 'NETWORK_EVENT': {
+                    case 'JSTC_LOADED_PPAS': {
+                      return (
+                        <TableRow key={i}>
+                          <TableCell colSpan={2} className="font-semibold text-purple-600">
+                            JSTC LOADED (_ppas)
+                          </TableCell>
+                        </TableRow>
+                      );
+                    }
+                    case 'PAQ_NETWORK_EVENT': {
                       const eventType = getEventType(msg.payload.params);
                       return (
                         <TableRow
@@ -117,8 +126,35 @@ export function App() {
                         >
                           <TableCell className="flex items-center gap-1">
                             <span>
-                              <ArrowUpDown className="text-blue-300" size={18} />
+                              <ArrowUpDown className="text-green-700" size={18} />
                             </span>{' '}
+                            <span
+                              className={cn(
+                                eventType === 'Broken Event' && 'font-bold text-red-600'
+                              )}
+                            >
+                              {eventType}
+                            </span>
+                          </TableCell>
+                          <TableCell>{msg.payload.url}</TableCell>
+                        </TableRow>
+                      );
+                    }
+                    case 'PPAS_NETWORK_EVENT': {
+                      const eventType = getEventType(msg.payload.params);
+                      return (
+                        <TableRow
+                          key={i}
+                          onClick={() => setSelectedMessage(msg)}
+                          className={cn('cursor-default', {
+                            'bg-slate-300 hover:bg-slate-300': selectedMessage?.id === msg.id,
+                          })}
+                        >
+                          <TableCell className="flex items-center gap-1">
+                            <span>
+                              <ArrowUpDown className="text-purple-700" size={18} />
+                            </span>
+                            {'PPAS '}
                             <span
                               className={cn(
                                 eventType === 'Broken Event' && 'font-bold text-red-600'
@@ -152,7 +188,39 @@ export function App() {
                           <TableCell className="flex items-center gap-1">
                             <span>
                               <ArrowRight className="text-green-300 opacity-80" size={18} />
-                            </span>{' '}
+                            </span>
+                            {'[_paq] '}
+                            <span>{msg.payload.data[0]}</span>
+                          </TableCell>
+                          <TableCell>
+                            {params.length === 0 ? '-' : JSON.stringify(params)}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    }
+                    case 'PPAS_ENTRY': {
+                      const params = msg.payload.data.slice(1, msg.payload.data.length);
+                      return (
+                        <TableRow
+                          key={i}
+                          onClick={() => setSelectedMessage(msg)}
+                          className={cn('cursor-default', {
+                            'bg-slate-300 hover:bg-slate-300': selectedMessage?.id === msg.id,
+                          })}
+
+                          // onClick={() => {
+                          //   browser.devtools.panels.openResource(
+                          //     'chrome-extension://lheofohbkhphjehlmohenmocgcojbalm/content-scripts/collector.js',
+                          //     67,
+                          //     44
+                          //   );
+                          // }}
+                        >
+                          <TableCell className="flex items-center gap-1">
+                            <span>
+                              <ArrowRight className="text-purple-500 opacity-80" size={18} />
+                            </span>
+                            {'[_ppas] '}
                             <span>{msg.payload.data[0]}</span>
                           </TableCell>
                           <TableCell>
@@ -182,7 +250,7 @@ export function App() {
                     <XCircle />
                   </Button>
                 </div>
-                {selectedMessage.type === 'PAQ_ENTRY' ? (
+                {selectedMessage.type === 'PAQ_ENTRY' || selectedMessage.type === 'PPAS_ENTRY' ? (
                   <>
                     <div>
                       Event name{' '}
@@ -204,7 +272,8 @@ export function App() {
                       </pre>
                     </div>
                   </>
-                ) : selectedMessage.type === 'NETWORK_EVENT' ? (
+                ) : selectedMessage.type === 'PAQ_NETWORK_EVENT' ||
+                  selectedMessage.type === 'PPAS_NETWORK_EVENT' ? (
                   <div>
                     network event:{' '}
                     <span className="font-bold">

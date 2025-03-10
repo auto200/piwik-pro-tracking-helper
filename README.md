@@ -1,13 +1,15 @@
 # TODO
 
-- support for \_paq & \_ppms
-- support for custom tracking endpoint
-- scope events to specific page
+- support for custom tracking endpoint (currently we only look for `/ppms.php` & `/piwik.php`)
+- scope events to specific page - if you have multiple pages open, all events from every page will be shown in the debugger
 - filters
 - support for batch network requests
 - payload validation for events and network events
 - grouping parameters in network event details
 - settings & persistence
+- show total number of events and network events
+- autoscrolling event list upon new event
+- events order - newest/oldest first
 - support for viewing direct method calls on tracker object
 - formatting and syntax highlighting for functions - pushed to queue and to methods like `setCustomRequestProcessing`
 - notification about new version updates of the extension <!-- https://api.github.com/repos/auto200/piwik-pro-jstc-debugger/releases/latest -->
