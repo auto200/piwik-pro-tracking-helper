@@ -11,6 +11,7 @@
 - settings & persistence
 - show total number of events and network events
 - autoscrolling event list upon new event
+- icon next to network events like in tracker debugger
 - events order - newest/oldest first
 - support for viewing direct method calls on tracker object
 - formatting and syntax highlighting for functions - pushed to queue and to methods like `setCustomRequestProcessing`
