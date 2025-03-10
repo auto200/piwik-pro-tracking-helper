@@ -12,15 +12,18 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { getEventType } from '@/lib/eventDetector';
-import { ArrowRight, ArrowUpDown, CircleX, XCircle } from 'lucide-react';
+import { ArrowRight, ArrowUpDown, CircleX, XCircle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useExtensionVersionMaybeNotLatest } from './hooks/useExtensionVersionMaybeNotLatest';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 type Entry = Message & { id: string };
 
 export function App() {
   const [msgs, setMsgs] = useState<Entry[]>([]);
   const [selectedMessage, setSelectedMessage] = useState<Entry | undefined>();
+  const extensionMaybeNotLatest = useExtensionVersionMaybeNotLatest();
 
   const containerRef = useRef<ComponentRef<'div'>>(null);
   const headerRef = useRef<ComponentRef<'div'>>(null);
@@ -38,7 +41,6 @@ export function App() {
     document.addEventListener(
       'keydown',
       (e) => {
-        console.log(e.key);
         if (e.key === 'Escape' || e.key === '`') {
           e.preventDefault();
           e.stopPropagation();
@@ -64,12 +66,10 @@ export function App() {
     };
   }, []);
 
-  console.log(localStorage);
-
   return (
     <div ref={containerRef}>
       {/* header */}
-      <div ref={headerRef}>
+      <div ref={headerRef} className="flex">
         <Button
           variant="outline"
           onClick={() => {
@@ -80,6 +80,30 @@ export function App() {
           <CircleX />
           <span>reset</span>
         </Button>
+
+        {extensionMaybeNotLatest && (
+          <div className="ml-auto mr-1">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button variant="ghost" className="bg-yellow-300 hover:bg-yellow-200" asChild>
+                    <a
+                      href="https://github.com/auto200/piwik-pro-jstc-debugger/releases"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <Info />
+                    </a>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Your extension: <b>{extensionMaybeNotLatest.current}</b> may be outdated. Latest
+                  version: <b>{extensionMaybeNotLatest.latest}</b>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        )}
       </div>
       {/* content */}
       <PanelGroup direction="horizontal" autoSaveId="JSTC_DBG_PANELS">
@@ -265,7 +289,7 @@ export function App() {
                         )}
                       </div>
                       <div className="mt-2">
-                        <div className="font-bold">Why was this event triggered?</div>
+                        <div className="font-bold">What triggered this event?</div>
                         <pre>
                           {selectedMessage.payload.stack
                             ?.split('\n')
