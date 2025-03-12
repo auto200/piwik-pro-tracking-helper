@@ -10,7 +10,7 @@ export default defineConfig({
   },
   // https://wxt.dev/api/reference/wxt/interfaces/ExtensionRunnerConfig.html
   runner: {
-    startUrls: ['https://help.piwik.pro'],
+    startUrls: ['http://localhost:5500/dev/'],
     chromiumArgs: ['--auto-open-devtools-for-tabs'],
     // openDevtools: true, //firefox only! - background script devtools
   },

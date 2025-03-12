@@ -23,20 +23,59 @@ browser.runtime.onConnect.addListener((p) => {
 browser.devtools.network.onRequestFinished.addListener((request: any) => {
   let msg: Message | undefined;
 
+  const isBatchRequest = request.request.postData?.text.startsWith('{"requests":[');
+
   if (request.request.url.endsWith('ppms.php')) {
-    msg = {
-      source: 'JSTC_DBG',
-      type: 'PAQ_NETWORK_EVENT',
-      payload: { url: request.request.url, params: request.request.postData?.params ?? [] },
-    };
+    if (isBatchRequest) {
+      console.log(JSON.parse(request.request.postData?.text).requests);
+      msg = {
+        source: 'JSTC_DBG',
+        type: 'PAQ_NETWORK_EVENT',
+        payload: {
+          type: 'BATCH',
+          url: request.request.url,
+          requestsParams: (JSON.parse(request.request.postData?.text).requests as string[]).map(
+            (r) => [...new URLSearchParams(r).entries()].map(([name, value]) => ({ name, value }))
+          ),
+        },
+      };
+    } else {
+      msg = {
+        source: 'JSTC_DBG',
+        type: 'PAQ_NETWORK_EVENT',
+        payload: {
+          type: 'SINGLE',
+          url: request.request.url,
+          params: request.request.postData?.params ?? [],
+        },
+      };
+    }
   }
 
   if (request.request.url.endsWith('piwik.php')) {
-    msg = {
-      source: 'JSTC_DBG',
-      type: 'PPAS_NETWORK_EVENT',
-      payload: { url: request.request.url, params: request.request.postData?.params ?? [] },
-    };
+    if (isBatchRequest) {
+      msg = {
+        source: 'JSTC_DBG',
+        type: 'PPAS_NETWORK_EVENT',
+        payload: {
+          type: 'BATCH',
+          url: request.request.url,
+          requestsParams: (JSON.parse(request.request.postData?.text).requests as string[]).map(
+            (r) => [...new URLSearchParams(r).entries()].map(([name, value]) => ({ name, value }))
+          ),
+        },
+      };
+    } else {
+      msg = {
+        source: 'JSTC_DBG',
+        type: 'PPAS_NETWORK_EVENT',
+        payload: {
+          type: 'SINGLE',
+          url: request.request.url,
+          params: request.request.postData?.params ?? [],
+        },
+      };
+    }
   }
 
   if (!msg) return;

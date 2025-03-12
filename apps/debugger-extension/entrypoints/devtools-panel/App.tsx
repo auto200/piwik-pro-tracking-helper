@@ -1,4 +1,4 @@
-import { ComponentRef, useEffect, useRef, useState } from 'react';
+import { Fragment, ComponentRef, useEffect, useRef, useState } from 'react';
 import { browser } from 'wxt/browser';
 import '@/assets/tailwind.css';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useExtensionVersionMaybeNotLatest } from './hooks/useExtensionVersionMaybeNotLatest';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Separator } from '@/components/ui/separator';
 
 type Entry = Message & { id: string };
 
@@ -138,8 +139,8 @@ export function App() {
                         </TableRow>
                       );
                     }
-                    case 'PAQ_NETWORK_EVENT': {
-                      const eventType = getEventType(msg.payload.params);
+                    case 'PAQ_NETWORK_EVENT':
+                    case 'PPAS_NETWORK_EVENT': {
                       return (
                         <TableRow
                           key={i}
@@ -152,47 +153,36 @@ export function App() {
                             <span>
                               <ArrowUpDown className="text-green-700" size={18} />
                             </span>
-                            {'_paq '}
-                            <span
-                              className={cn(
-                                eventType === 'Broken Event' && 'font-bold text-red-600'
-                              )}
-                            >
-                              {eventType}
-                            </span>
+                            {msg.type === 'PAQ_NETWORK_EVENT' ? '_paq ' : '_ppas'}
+                            {msg.payload.type === 'BATCH' ? (
+                              msg.payload.requestsParams.map((params, i) => (
+                                <span
+                                  key={i}
+                                  className={cn(
+                                    getEventType(params) === 'Broken Event' &&
+                                      'font-bold text-red-600'
+                                  )}
+                                >
+                                  {getEventType(params)}
+                                </span>
+                              ))
+                            ) : (
+                              <span
+                                className={cn(
+                                  getEventType(msg.payload.params) === 'Broken Event' &&
+                                    'font-bold text-red-600'
+                                )}
+                              >
+                                {getEventType(msg.payload.params)}
+                              </span>
+                            )}
                           </TableCell>
                           <TableCell>{msg.payload.url}</TableCell>
                         </TableRow>
                       );
                     }
-                    case 'PPAS_NETWORK_EVENT': {
-                      const eventType = getEventType(msg.payload.params);
-                      return (
-                        <TableRow
-                          key={i}
-                          onClick={() => setSelectedMessage(msg)}
-                          className={cn('cursor-default', {
-                            'bg-slate-300 hover:bg-slate-300': selectedMessage?.id === msg.id,
-                          })}
-                        >
-                          <TableCell className="flex items-center gap-1">
-                            <span>
-                              <ArrowUpDown className="text-purple-700" size={18} />
-                            </span>
-                            {'_ppas '}
-                            <span
-                              className={cn(
-                                eventType === 'Broken Event' && 'font-bold text-red-600'
-                              )}
-                            >
-                              {eventType}
-                            </span>
-                          </TableCell>
-                          <TableCell>{msg.payload.url}</TableCell>
-                        </TableRow>
-                      );
-                    }
-                    case 'PAQ_ENTRY': {
+                    case 'PAQ_ENTRY':
+                    case 'PPAS_ENTRY': {
                       const params = msg.payload.data.slice(1, msg.payload.data.length);
                       return (
                         <TableRow
@@ -214,38 +204,7 @@ export function App() {
                             <span>
                               <ArrowRight className="text-green-300 opacity-80" size={18} />
                             </span>
-                            {'[_paq] '}
-                            <span>{msg.payload.data[0]}</span>
-                          </TableCell>
-                          <TableCell>
-                            {params.length === 0 ? '-' : JSON.stringify(params)}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    }
-                    case 'PPAS_ENTRY': {
-                      const params = msg.payload.data.slice(1, msg.payload.data.length);
-                      return (
-                        <TableRow
-                          key={i}
-                          onClick={() => setSelectedMessage(msg)}
-                          className={cn('cursor-default', {
-                            'bg-slate-300 hover:bg-slate-300': selectedMessage?.id === msg.id,
-                          })}
-
-                          // onClick={() => {
-                          //   browser.devtools.panels.openResource(
-                          //     'chrome-extension://lheofohbkhphjehlmohenmocgcojbalm/content-scripts/collector.js',
-                          //     67,
-                          //     44
-                          //   );
-                          // }}
-                        >
-                          <TableCell className="flex items-center gap-1">
-                            <span>
-                              <ArrowRight className="text-purple-500 opacity-80" size={18} />
-                            </span>
-                            {'[_ppas] '}
+                            {msg.type === 'PAQ_ENTRY' ? '[_paq] ' : '[_ppas] '}
                             <span>{msg.payload.data[0]}</span>
                           </TableCell>
                           <TableCell>
@@ -269,58 +228,107 @@ export function App() {
           <>
             <PanelResizeHandle className="basis-[0.15rem] bg-slate-400" />
             <Panel order={2}>
-              <div className="h-full overflow-auto bg-red-200">
-                <div className="sticky top-0 border-b-2 border-slate-300 bg-red-200">
+              <div className="h-full overflow-auto bg-slate-100">
+                <div className="sticky top-0 border-b-2 border-slate-300 bg-slate-100">
                   <Button variant="ghost" size="icon" onClick={() => setSelectedMessage(undefined)}>
                     <XCircle />
                   </Button>
                 </div>
                 <div className="p-2">
-                  {selectedMessage.type === 'PAQ_ENTRY' || selectedMessage.type === 'PPAS_ENTRY' ? (
-                    <>
-                      <div>
-                        Event name{' '}
-                        <span className="font-bold">{selectedMessage.payload.data[0]}</span>
+                  {(selectedMessage.type === 'PAQ_NETWORK_EVENT' ||
+                    selectedMessage.type === 'PPAS_NETWORK_EVENT') &&
+                    selectedMessage.payload.type === 'BATCH' && (
+                      <div className="my-3 font-bold">
+                        <p>Batch of events</p>
+                        <p>Count: {selectedMessage.payload.requestsParams.length}</p>
                       </div>
-                      <div>
-                        parameters:{' '}
-                        {JSON.stringify(
-                          selectedMessage.payload.data.slice(1, selectedMessage.payload.data.length)
-                        )}
-                      </div>
-                      <div className="mt-2">
-                        <div className="font-bold">What triggered this event?</div>
-                        <pre>
-                          {selectedMessage.payload.stack
-                            ?.split('\n')
-                            .slice(1, selectedMessage.payload.stack.split('\n').length)
-                            .join('\n')}
-                        </pre>
-                      </div>
-                    </>
-                  ) : selectedMessage.type === 'PAQ_NETWORK_EVENT' ||
-                    selectedMessage.type === 'PPAS_NETWORK_EVENT' ? (
-                    <div>
-                      network event:{' '}
-                      <span className="font-bold">
-                        {getEventType(selectedMessage.payload.params)}
-                      </span>
-                      {getEventType(selectedMessage.payload.params) === 'Broken Event' &&
-                        selectedMessage.payload.params.length == 0 && (
-                          <div className="mt-2 font-bold">
-                            This may be Last heartbeat ping, these are currently not supported and
-                            displayed as broken events.
-                          </div>
-                        )}
-                      <div>
-                        {selectedMessage.payload.params.map((e, i) => (
-                          <div key={i}>
-                            {e.name}: <span className="font-bold">{e.value}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
+                    )}
+                  {(() => {
+                    switch (selectedMessage.type) {
+                      case 'PAQ_ENTRY':
+                      case 'PPAS_ENTRY': {
+                        return (
+                          <>
+                            <div>
+                              Event name{' '}
+                              <span className="font-bold">{selectedMessage.payload.data[0]}</span>
+                            </div>
+                            <div>
+                              parameters:{' '}
+                              {JSON.stringify(
+                                selectedMessage.payload.data.slice(
+                                  1,
+                                  selectedMessage.payload.data.length
+                                )
+                              )}
+                            </div>
+                            <div className="mt-2">
+                              <div className="font-bold">What triggered this event?</div>
+                              <pre>
+                                {selectedMessage.payload.stack
+                                  ?.split('\n')
+                                  .slice(1, selectedMessage.payload.stack.split('\n').length)
+                                  .join('\n')}
+                              </pre>
+                            </div>
+                          </>
+                        );
+                      }
+                      case 'PAQ_NETWORK_EVENT':
+                      case 'PPAS_NETWORK_EVENT': {
+                        if (selectedMessage.payload.type === 'SINGLE') {
+                          return (
+                            <div>
+                              network event:{' '}
+                              <span className="font-bold">
+                                {getEventType(selectedMessage.payload.params)}
+                              </span>
+                              {getEventType(selectedMessage.payload.params) === 'Broken Event' &&
+                                selectedMessage.payload.params.length == 0 && (
+                                  <div className="mt-2 font-bold">
+                                    This may be Last heartbeat ping, these are currently not
+                                    supported and displayed as broken events.
+                                  </div>
+                                )}
+                              <div>
+                                {selectedMessage.payload.params.map((e, i) => (
+                                  <div key={i}>
+                                    {e.name}: <span className="font-bold">{e.value}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        } else {
+                          return selectedMessage.payload.requestsParams.map((params, i) => (
+                            <Fragment key={i}>
+                              <div>
+                                network event:{' '}
+                                <span className="font-bold">{getEventType(params)}</span>
+                                {getEventType(params) === 'Broken Event' && params.length == 0 && (
+                                  <div className="mt-2 font-bold">
+                                    This may be Last heartbeat ping, these are currently not
+                                    supported and displayed as broken events.
+                                  </div>
+                                )}
+                                <div>
+                                  {params.map((e, i) => (
+                                    <div key={i}>
+                                      {e.name}: <span className="font-bold">{e.value}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                              <Separator className="my-3" />
+                            </Fragment>
+                          ));
+                        }
+                      }
+                      default: {
+                        return null;
+                      }
+                    }
+                  })()}
                 </div>
               </div>
             </Panel>

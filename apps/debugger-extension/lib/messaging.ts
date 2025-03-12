@@ -9,7 +9,9 @@ export type Message =
   | {
       type: 'PAQ_NETWORK_EVENT' | 'PPAS_NETWORK_EVENT';
       source: 'JSTC_DBG';
-      payload: { url: string; params: QueryParam[] };
+      payload:
+        | { type: 'SINGLE'; url: string; params: QueryParam[] }
+        | { type: 'BATCH'; url: string; requestsParams: Array<QueryParam[]> };
     }
   | {
       type: 'JSTC_LOADED_PAQ' | 'JSTC_LOADED_PPAS';

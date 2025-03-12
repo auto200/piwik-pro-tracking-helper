@@ -3,7 +3,6 @@
 - support for custom tracking endpoint (currently we only look for `/ppms.php` & `/piwik.php`)
 - scope events to specific page - if you have multiple pages open, all events from every page will be shown in the debugger
 - filters
-- support for batch network requests
 - payload validation for events and network events
 - grouping parameters in network event details
 - better display of parameters
