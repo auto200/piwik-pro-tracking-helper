@@ -16,4 +16,11 @@ export type Message =
   | {
       type: 'JSTC_LOADED_PAQ' | 'JSTC_LOADED_PPAS';
       source: 'JSTC_DBG';
+    }
+  | {
+      type: 'PAGE_METADATA';
+      source: 'JSTC_DBG';
+      payload: {
+        origin: string;
+      };
     };

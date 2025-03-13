@@ -1,4 +1,4 @@
-import { Fragment, ComponentRef, useEffect, useRef, useState } from 'react';
+import { Fragment, ComponentRef, useRef, useState, useLayoutEffect } from 'react';
 import { browser } from 'wxt/browser';
 import '@/assets/tailwind.css';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
@@ -16,7 +16,7 @@ import { ArrowRight, ArrowUpDown, CircleX, XCircle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useExtensionVersionMaybeNotLatest } from './hooks/useExtensionVersionMaybeNotLatest';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
 
 type Entry = Message & { id: string };
@@ -28,14 +28,48 @@ export function App() {
 
   const containerRef = useRef<ComponentRef<'div'>>(null);
   const headerRef = useRef<ComponentRef<'div'>>(null);
+  const trackingEndpointsRef = useRef<{ _paq: string[]; _ppas: string[] }>({ _paq: [], _ppas: [] });
+  const pageOriginRef = useRef('');
+  const isNetworkListenerAttachedRef = useRef(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const port = browser.runtime.connect({ name: 'devtools' });
 
-    port.onMessage.addListener(function (msg) {
-      console.log('[panel]: Message from background script:', msg);
+    port.onMessage.addListener(function (_msg) {
+      const msg = _msg as Message;
+      if (msg.type === 'PAGE_METADATA') {
+        pageOriginRef.current = msg.payload.origin;
+        return;
+      }
+      setMsgs((msgs) => [...msgs, { ...msg, id: crypto.randomUUID() }]);
 
-      setMsgs((msgs) => [...msgs, { ...(msg as any), id: crypto.randomUUID() }]);
+      if (msg.type !== 'PAQ_ENTRY' && msg.type !== 'PPAS_ENTRY') return;
+
+      const [name, trackerUrl] = msg.payload.data;
+      if (name !== 'setTrackerUrl') return;
+      if (typeof trackerUrl !== 'string') return;
+
+      let parsedUrl = '';
+
+      if (trackerUrl.startsWith('//')) {
+        parsedUrl = new URL(pageOriginRef.current).protocol + trackerUrl;
+      } else if (trackerUrl.startsWith('/')) {
+        parsedUrl = new URL(pageOriginRef.current).hostname + trackerUrl;
+      } else {
+        parsedUrl = trackerUrl;
+      }
+
+      if (!parsedUrl) return;
+
+      if (msg.type === 'PAQ_ENTRY') {
+        if (!trackingEndpointsRef.current._paq.includes(parsedUrl)) {
+          trackingEndpointsRef.current._paq.push(parsedUrl);
+        }
+      } else {
+        if (!trackingEndpointsRef.current._ppas.includes(parsedUrl)) {
+          trackingEndpointsRef.current._ppas.push(parsedUrl);
+        }
+      }
     });
 
     const abortController = new AbortController();
@@ -67,6 +101,25 @@ export function App() {
     };
   }, []);
 
+  useLayoutEffect(() => {
+    if (isNetworkListenerAttachedRef.current) return;
+    browser.devtools.network.onRequestFinished.addListener((request: any) => {
+      let msg: Message | undefined;
+      if (trackingEndpointsRef.current._paq.includes(request.request.url)) {
+        msg = getMessage(request, 'PAQ_NETWORK_EVENT');
+      }
+      if (trackingEndpointsRef.current._ppas.includes(request.request.url)) {
+        msg = getMessage(request, 'PPAS_NETWORK_EVENT');
+      }
+
+      if (!msg) return;
+
+      setMsgs((msgs) => [...msgs, { ...msg, id: crypto.randomUUID() }]);
+    });
+    // there is some problem on firefox with removing listener in cleanup function
+    isNetworkListenerAttachedRef.current = true;
+  }, []);
+
   return (
     <div ref={containerRef}>
       {/* header */}
@@ -82,29 +135,32 @@ export function App() {
           <span>reset</span>
         </Button>
 
-        {extensionMaybeNotLatest && (
-          <div className="ml-auto mr-1">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Button variant="ghost" className="bg-yellow-300 hover:bg-yellow-200" asChild>
-                    <a
-                      href="https://github.com/auto200/piwik-pro-jstc-debugger/releases"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <Info />
-                    </a>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  Your extension: <b>{extensionMaybeNotLatest.current}</b> may be outdated. Latest
-                  version: <b>{extensionMaybeNotLatest.latest}</b>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        )}
+        <div className="ml-auto mr-1 flex gap-2">
+          {extensionMaybeNotLatest && (
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="bg-yellow-300 hover:bg-yellow-200"
+                  asChild
+                >
+                  <a
+                    href="https://github.com/auto200/piwik-pro-jstc-debugger/releases"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Info />
+                  </a>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                Your extension: <b>{extensionMaybeNotLatest.current}</b> may be outdated. Latest
+                version: <b>{extensionMaybeNotLatest.latest}</b>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
       </div>
       {/* content */}
       <PanelGroup direction="horizontal" autoSaveId="JSTC_DBG_PANELS">
@@ -151,7 +207,14 @@ export function App() {
                         >
                           <TableCell className="flex items-center gap-1">
                             <span>
-                              <ArrowUpDown className="text-green-700" size={18} />
+                              <ArrowUpDown
+                                className={
+                                  msg.type === 'PAQ_NETWORK_EVENT'
+                                    ? 'text-green-700'
+                                    : 'text-purple-500'
+                                }
+                                size={18}
+                              />
                             </span>
                             {msg.type === 'PAQ_NETWORK_EVENT' ? '_paq ' : '_ppas'}
                             {msg.payload.type === 'BATCH' ? (
@@ -202,7 +265,10 @@ export function App() {
                         >
                           <TableCell className="flex items-center gap-1">
                             <span>
-                              <ArrowRight className="text-green-300 opacity-80" size={18} />
+                              <ArrowRight
+                                className={`${msg.type === 'PAQ_ENTRY' ? 'text-green-300' : 'text-purple-400'} opacity-80`}
+                                size={18}
+                              />
                             </span>
                             {msg.type === 'PAQ_ENTRY' ? '[_paq] ' : '[_ppas] '}
                             <span>{msg.payload.data[0]}</span>
@@ -212,6 +278,9 @@ export function App() {
                           </TableCell>
                         </TableRow>
                       );
+                    }
+                    case 'PAGE_METADATA': {
+                      return;
                     }
                     default: {
                       // @ts-expect-error dummy check for now
@@ -250,7 +319,7 @@ export function App() {
                         return (
                           <>
                             <div>
-                              Event name{' '}
+                              Event name:{' '}
                               <span className="font-bold">{selectedMessage.payload.data[0]}</span>
                             </div>
                             <div>
@@ -268,6 +337,7 @@ export function App() {
                                 {selectedMessage.payload.stack
                                   ?.split('\n')
                                   .slice(1, selectedMessage.payload.stack.split('\n').length)
+                                  .filter((l) => !l.includes('chrome-extension'))
                                   .join('\n')}
                               </pre>
                             </div>
@@ -279,7 +349,7 @@ export function App() {
                         if (selectedMessage.payload.type === 'SINGLE') {
                           return (
                             <div>
-                              network event:{' '}
+                              Network event:{' '}
                               <span className="font-bold">
                                 {getEventType(selectedMessage.payload.params)}
                               </span>
@@ -291,6 +361,8 @@ export function App() {
                                   </div>
                                 )}
                               <div>
+                                <b>Parameters:</b>
+                                <Separator />
                                 {selectedMessage.payload.params.map((e, i) => (
                                   <div key={i}>
                                     {e.name}: <span className="font-bold">{e.value}</span>
@@ -337,4 +409,65 @@ export function App() {
       </PanelGroup>
     </div>
   );
+}
+
+function getMessage(
+  request: any,
+  eventType: 'PAQ_NETWORK_EVENT' | 'PPAS_NETWORK_EVENT'
+): Message | undefined {
+  const isBatchRequest = request.request.postData?.text.startsWith('{"requests":[');
+
+  if (eventType === 'PAQ_NETWORK_EVENT') {
+    if (isBatchRequest) {
+      return {
+        source: 'JSTC_DBG',
+        type: 'PAQ_NETWORK_EVENT',
+        payload: {
+          type: 'BATCH',
+          url: request.request.url,
+          requestsParams: (JSON.parse(request.request.postData?.text).requests as string[]).map(
+            (r) => [...new URLSearchParams(r).entries()].map(([name, value]) => ({ name, value }))
+          ),
+        },
+      };
+    } else {
+      return {
+        source: 'JSTC_DBG',
+        type: 'PAQ_NETWORK_EVENT',
+        payload: {
+          type: 'SINGLE',
+          url: request.request.url,
+          params: request.request.postData?.params ?? [],
+        },
+      };
+    }
+  }
+
+  if (eventType === 'PPAS_NETWORK_EVENT') {
+    if (isBatchRequest) {
+      return {
+        source: 'JSTC_DBG',
+        type: 'PPAS_NETWORK_EVENT',
+        payload: {
+          type: 'BATCH',
+          url: request.request.url,
+          requestsParams: (JSON.parse(request.request.postData?.text).requests as string[]).map(
+            (r) => [...new URLSearchParams(r).entries()].map(([name, value]) => ({ name, value }))
+          ),
+        },
+      };
+    } else {
+      return {
+        source: 'JSTC_DBG',
+        type: 'PPAS_NETWORK_EVENT',
+        payload: {
+          type: 'SINGLE',
+          url: request.request.url,
+          params: request.request.postData?.params ?? [],
+        },
+      };
+    }
+  }
+
+  return undefined;
 }

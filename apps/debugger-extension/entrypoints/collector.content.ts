@@ -17,6 +17,11 @@ export default defineContentScript({
   world: 'MAIN',
   runAt: 'document_start',
   main() {
+    sendMessage({
+      source: 'JSTC_DBG',
+      type: 'PAGE_METADATA',
+      payload: { origin: location.origin },
+    });
     function registerQueueListener({
       queueName,
       loadedEventType,
