@@ -54,9 +54,11 @@ export function App() {
       if (trackerUrl.startsWith('//')) {
         parsedUrl = new URL(pageOriginRef.current).protocol + trackerUrl;
       } else if (trackerUrl.startsWith('/')) {
-        parsedUrl = new URL(pageOriginRef.current).hostname + trackerUrl;
-      } else {
+        parsedUrl = pageOriginRef.current + trackerUrl;
+      } else if (trackerUrl.startsWith('http')) {
         parsedUrl = trackerUrl;
+      } else {
+        parsedUrl = new URL(pageOriginRef.current).origin + '/' + trackerUrl;
       }
 
       if (!parsedUrl) return;
