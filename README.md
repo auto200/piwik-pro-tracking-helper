@@ -1,6 +1,6 @@
 # TODO
 
-- support for custom tracking endpoint (currently we only look for `/ppms.php` & `/piwik.php`)
+- support for custom tracking endpoint (currently we only look for `/ppas.php` & `/piwik.php`)
 - scope events to specific page - if you have multiple pages open, all events from every page will be shown in the debugger
 - filters
 - payload validation for events and network events

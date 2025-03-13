@@ -7,10 +7,10 @@ export default defineBackground(() => {
   let devToolsPort: Runtime.Port | undefined;
   // from forwarder
   // @ts-expect-error lol
-  browser.runtime.onMessage.addListener((request: Message | undefined): undefined => {
-    if (request?.source !== 'JSTC_DBG') return;
+  browser.runtime.onMessage.addListener((request: Message | undefined) => {
+    if (request?.source !== 'JSTC_DBG') return true;
     if (!devToolsPort) {
-      return;
+      return true;
     }
 
     devToolsPort.postMessage(request);
@@ -21,4 +21,6 @@ export default defineBackground(() => {
     console.assert(port.name === 'devtools');
     devToolsPort = port;
   });
+
+  return true;
 });

@@ -90,10 +90,9 @@ export default defineContentScript({
         configurable: true,
         enumerable: true,
 
-        // First thing that JSTC does after loading is setting global Piwik object,
+        // First thing that JSTC does after loading is setting global Piwik/PPAS object,
         // when that object is defined we are sure that JSTC has loaded
         set: function (value) {
-          // console.log('set called', new Error()); // interesting way to see what caused the push
           if (Array.isArray(internal_queue)) {
             // TODO: send message that JSTC has been initialized
             internal_queue.forEach((p) => {

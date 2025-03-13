@@ -1,5 +1,11 @@
-import { Fragment, ComponentRef, useRef, useState, useLayoutEffect } from 'react';
-import { browser } from 'wxt/browser';
+import {
+  Fragment,
+  ComponentRef,
+  useRef,
+  useState,
+  useLayoutEffect,
+  useSyncExternalStore,
+} from 'react';
 import '@/assets/tailwind.css';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { Message } from '@/lib/messaging';
@@ -18,62 +24,20 @@ import { Button } from '@/components/ui/button';
 import { useExtensionVersionMaybeNotLatest } from './hooks/useExtensionVersionMaybeNotLatest';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
+import { eventStore } from './eventStore';
 
 type Entry = Message & { id: string };
 
 export function App() {
-  const [msgs, setMsgs] = useState<Entry[]>([]);
+  const msgs = useSyncExternalStore(eventStore.subscribe, eventStore.getSnapshot);
   const [selectedMessage, setSelectedMessage] = useState<Entry | undefined>();
   const extensionMaybeNotLatest = useExtensionVersionMaybeNotLatest();
 
   const containerRef = useRef<ComponentRef<'div'>>(null);
   const headerRef = useRef<ComponentRef<'div'>>(null);
   const trackingEndpointsRef = useRef<{ _paq: string[]; _ppas: string[] }>({ _paq: [], _ppas: [] });
-  const pageOriginRef = useRef('');
-  const isNetworkListenerAttachedRef = useRef(false);
 
   useLayoutEffect(() => {
-    const port = browser.runtime.connect({ name: 'devtools' });
-
-    port.onMessage.addListener(function (_msg) {
-      const msg = _msg as Message;
-      if (msg.type === 'PAGE_METADATA') {
-        pageOriginRef.current = msg.payload.origin;
-        return;
-      }
-      setMsgs((msgs) => [...msgs, { ...msg, id: crypto.randomUUID() }]);
-
-      if (msg.type !== 'PAQ_ENTRY' && msg.type !== 'PPAS_ENTRY') return;
-
-      const [name, trackerUrl] = msg.payload.data;
-      if (name !== 'setTrackerUrl') return;
-      if (typeof trackerUrl !== 'string') return;
-
-      let parsedUrl = '';
-
-      if (trackerUrl.startsWith('//')) {
-        parsedUrl = new URL(pageOriginRef.current).protocol + trackerUrl;
-      } else if (trackerUrl.startsWith('/')) {
-        parsedUrl = pageOriginRef.current + trackerUrl;
-      } else if (trackerUrl.startsWith('http')) {
-        parsedUrl = trackerUrl;
-      } else {
-        parsedUrl = new URL(pageOriginRef.current).origin + '/' + trackerUrl;
-      }
-
-      if (!parsedUrl) return;
-
-      if (msg.type === 'PAQ_ENTRY') {
-        if (!trackingEndpointsRef.current._paq.includes(parsedUrl)) {
-          trackingEndpointsRef.current._paq.push(parsedUrl);
-        }
-      } else {
-        if (!trackingEndpointsRef.current._ppas.includes(parsedUrl)) {
-          trackingEndpointsRef.current._ppas.push(parsedUrl);
-        }
-      }
-    });
-
     const abortController = new AbortController();
     document.addEventListener(
       'keydown',
@@ -103,33 +67,15 @@ export function App() {
     };
   }, []);
 
-  useLayoutEffect(() => {
-    if (isNetworkListenerAttachedRef.current) return;
-    browser.devtools.network.onRequestFinished.addListener((request: any) => {
-      let msg: Message | undefined;
-      if (trackingEndpointsRef.current._paq.includes(request.request.url)) {
-        msg = getMessage(request, 'PAQ_NETWORK_EVENT');
-      }
-      if (trackingEndpointsRef.current._ppas.includes(request.request.url)) {
-        msg = getMessage(request, 'PPAS_NETWORK_EVENT');
-      }
-
-      if (!msg) return;
-
-      setMsgs((msgs) => [...msgs, { ...msg, id: crypto.randomUUID() }]);
-    });
-    // there is some problem on firefox with removing listener in cleanup function
-    isNetworkListenerAttachedRef.current = true;
-  }, []);
-
   return (
     <div ref={containerRef}>
+      {JSON.stringify(trackingEndpointsRef.current)}
       {/* header */}
       <div ref={headerRef} className="flex">
         <Button
           variant="outline"
           onClick={() => {
-            setMsgs([]);
+            eventStore.clear();
             setSelectedMessage(undefined);
           }}
         >
@@ -301,7 +247,12 @@ export function App() {
             <Panel order={2}>
               <div className="h-full overflow-auto bg-slate-100">
                 <div className="sticky top-0 border-b-2 border-slate-300 bg-slate-100">
-                  <Button variant="ghost" size="icon" onClick={() => setSelectedMessage(undefined)}>
+                  <Button
+                    variant="ghost"
+                    className="hover:bg-slate-200"
+                    size="icon"
+                    onClick={() => setSelectedMessage(undefined)}
+                  >
                     <XCircle />
                   </Button>
                 </div>
@@ -411,65 +362,4 @@ export function App() {
       </PanelGroup>
     </div>
   );
-}
-
-function getMessage(
-  request: any,
-  eventType: 'PAQ_NETWORK_EVENT' | 'PPAS_NETWORK_EVENT'
-): Message | undefined {
-  const isBatchRequest = request.request.postData?.text.startsWith('{"requests":[');
-
-  if (eventType === 'PAQ_NETWORK_EVENT') {
-    if (isBatchRequest) {
-      return {
-        source: 'JSTC_DBG',
-        type: 'PAQ_NETWORK_EVENT',
-        payload: {
-          type: 'BATCH',
-          url: request.request.url,
-          requestsParams: (JSON.parse(request.request.postData?.text).requests as string[]).map(
-            (r) => [...new URLSearchParams(r).entries()].map(([name, value]) => ({ name, value }))
-          ),
-        },
-      };
-    } else {
-      return {
-        source: 'JSTC_DBG',
-        type: 'PAQ_NETWORK_EVENT',
-        payload: {
-          type: 'SINGLE',
-          url: request.request.url,
-          params: request.request.postData?.params ?? [],
-        },
-      };
-    }
-  }
-
-  if (eventType === 'PPAS_NETWORK_EVENT') {
-    if (isBatchRequest) {
-      return {
-        source: 'JSTC_DBG',
-        type: 'PPAS_NETWORK_EVENT',
-        payload: {
-          type: 'BATCH',
-          url: request.request.url,
-          requestsParams: (JSON.parse(request.request.postData?.text).requests as string[]).map(
-            (r) => [...new URLSearchParams(r).entries()].map(([name, value]) => ({ name, value }))
-          ),
-        },
-      };
-    } else {
-      return {
-        source: 'JSTC_DBG',
-        type: 'PPAS_NETWORK_EVENT',
-        payload: {
-          type: 'SINGLE',
-          url: request.request.url,
-          params: request.request.postData?.params ?? [],
-        },
-      };
-    }
-  }
-
-  return undefined;
 }

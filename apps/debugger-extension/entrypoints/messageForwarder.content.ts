@@ -8,7 +8,11 @@ export default defineContentScript({
   main() {
     window.addEventListener('message', (ev: MessageEvent<Message>) => {
       if (ev.data.source === 'JSTC_DBG') {
-        browser.runtime.sendMessage(ev.data);
+        try {
+          browser.runtime.sendMessage(ev.data);
+        } catch (e) {
+          console.log(e);
+        }
       }
     });
   },
