@@ -4,22 +4,76 @@ import { browser } from 'wxt/browser';
 export type Entry = Message & { id: string };
 
 type Listener = () => void;
-let messages: Entry[] = [];
 let listeners: Listener[] = [];
 
-const port = browser.runtime.connect({ name: 'devtools' });
+let messages: Entry[] = [];
 let pageOrigin = '';
-const trackingEndpoints: { _paq: string[]; _ppas: string[] } = { _paq: [], _ppas: [] };
+const _paqTrackingEndpoints: string[] = [];
+const _ppasTrackingEndpoints: string[] = [];
 
+function paqNetworkHandler(request: any) {
+  const msg: Entry | undefined = _paqTrackingEndpoints.includes(request.request.url)
+    ? getNetworkEntry(request, 'PAQ_NETWORK_EVENT')
+    : undefined;
+  if (msg) {
+    messages = [...messages, msg];
+    emitChange();
+  }
+}
+function ppasNetworkHandler(request: any) {
+  const msg: Entry | undefined = _ppasTrackingEndpoints.includes(request.request.url)
+    ? getNetworkEntry(request, 'PPAS_NETWORK_EVENT')
+    : undefined;
+  if (msg) {
+    messages = [...messages, msg];
+    emitChange();
+  }
+}
+
+function handleJSTCLoaded(queueName: 'JSTC_LOADED_PAQ' | 'JSTC_LOADED_PPAS') {
+  const queueTrackingEndpoints =
+    queueName === 'JSTC_LOADED_PAQ' ? _paqTrackingEndpoints : _ppasTrackingEndpoints;
+  const networkEventName: 'PAQ_NETWORK_EVENT' | 'PPAS_NETWORK_EVENT' =
+    queueName === 'JSTC_LOADED_PAQ' ? 'PAQ_NETWORK_EVENT' : 'PPAS_NETWORK_EVENT';
+
+  // reprocess queue
+  const newMessages: Entry[] = [];
+  for (const request of allRequests) {
+    const msg: Entry | undefined = queueTrackingEndpoints.includes(request.request.url)
+      ? getNetworkEntry(request, networkEventName)
+      : undefined;
+    if (msg) {
+      newMessages.push(msg);
+    }
+  }
+  if (newMessages.length) {
+    messages = [...messages, ...newMessages];
+    emitChange();
+  }
+  if (queueName === 'JSTC_LOADED_PAQ') {
+    browser.devtools.network.onRequestFinished.removeListener(paqNetworkHandler);
+    browser.devtools.network.onRequestFinished.addListener(paqNetworkHandler);
+  } else {
+    browser.devtools.network.onRequestFinished.removeListener(ppasNetworkHandler);
+    browser.devtools.network.onRequestFinished.addListener(ppasNetworkHandler);
+  }
+}
+const port = browser.runtime.connect({ name: 'devtools' });
 port.onMessage.addListener(function (_msg) {
   const msg = _msg as Message;
   if (msg.source !== 'JSTC_DBG') return true;
   if (msg.type === 'PAGE_METADATA') {
     pageOrigin = msg.payload.origin;
+    allRequests.length = 0;
     return true;
   }
 
   messages = [...messages, { ...msg, id: crypto.randomUUID() }];
+  emitChange();
+  if (msg.type === 'JSTC_LOADED_PAQ' || msg.type === 'JSTC_LOADED_PPAS') {
+    handleJSTCLoaded(msg.type);
+    return;
+  }
 
   if (msg.type !== 'PAQ_ENTRY' && msg.type !== 'PPAS_ENTRY') return true;
 
@@ -42,31 +96,21 @@ port.onMessage.addListener(function (_msg) {
   if (!parsedUrl) return true;
 
   if (msg.type === 'PAQ_ENTRY') {
-    if (!trackingEndpoints._paq.includes(parsedUrl)) {
-      trackingEndpoints._paq.push(parsedUrl);
+    if (!_paqTrackingEndpoints.includes(parsedUrl)) {
+      _paqTrackingEndpoints.push(parsedUrl);
     }
   } else {
-    if (!trackingEndpoints._ppas.includes(parsedUrl)) {
-      trackingEndpoints._ppas.push(parsedUrl);
+    if (!_ppasTrackingEndpoints.includes(parsedUrl)) {
+      _ppasTrackingEndpoints.push(parsedUrl);
     }
   }
-  emitChange();
   return true;
 });
 
+const allRequests: any[] = [];
+
 browser.devtools.network.onRequestFinished.addListener((request: any) => {
-  let msg: Message | undefined;
-
-  if (trackingEndpoints._paq.includes(request.request.url)) {
-    msg = getMessage(request, 'PAQ_NETWORK_EVENT');
-  }
-  if (trackingEndpoints._ppas.includes(request.request.url)) {
-    msg = getMessage(request, 'PPAS_NETWORK_EVENT');
-  }
-
-  if (!msg) return;
-  messages = [...messages, { ...msg, id: crypto.randomUUID() }];
-  emitChange();
+  allRequests.push(request);
 });
 
 export const eventStore = {
@@ -82,6 +126,7 @@ export const eventStore = {
   clear: () => {
     messages = [];
     pageOrigin = '';
+    allRequests.length = 0;
     emitChange();
   },
 };
@@ -92,10 +137,10 @@ function emitChange() {
   }
 }
 
-function getMessage(
+function getNetworkEntry(
   request: any,
   eventType: 'PAQ_NETWORK_EVENT' | 'PPAS_NETWORK_EVENT'
-): Message | undefined {
+): Entry | undefined {
   const isBatchRequest = request.request.postData?.text.startsWith('{"requests":[');
 
   if (eventType === 'PAQ_NETWORK_EVENT') {
@@ -110,6 +155,7 @@ function getMessage(
             (r) => [...new URLSearchParams(r).entries()].map(([name, value]) => ({ name, value }))
           ),
         },
+        id: crypto.randomUUID(),
       };
     } else {
       return {
@@ -120,6 +166,7 @@ function getMessage(
           url: request.request.url,
           params: request.request.postData?.params ?? [],
         },
+        id: crypto.randomUUID(),
       };
     }
   }
@@ -136,6 +183,7 @@ function getMessage(
             (r) => [...new URLSearchParams(r).entries()].map(([name, value]) => ({ name, value }))
           ),
         },
+        id: crypto.randomUUID(),
       };
     } else {
       return {
@@ -146,6 +194,7 @@ function getMessage(
           url: request.request.url,
           params: request.request.postData?.params ?? [],
         },
+        id: crypto.randomUUID(),
       };
     }
   }

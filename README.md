@@ -1,6 +1,6 @@
 # TODO
 
-- support for custom tracking endpoint (currently we only look for `/ppas.php` & `/piwik.php`)
+- detection if JSTC is on the page - currently we display nothing
 - scope events to specific page - if you have multiple pages open, all events from every page will be shown in the debugger
 - filters
 - payload validation for events and network events
@@ -10,9 +10,9 @@
 - settings & persistence
 - show total number of events and network events
 - autoscrolling event list upon new event
-- icon next to network events like in tracker debugger
+- pretty icon next to network events like in tracker debugger
 - events order - newest/oldest first
-- support for viewing direct method calls on tracker object
+- support for viewing direct method calls on tracker object, currently we only have information on \_paq/\_ppas.push()
 - formatting and syntax highlighting for functions - pushed to queue and to methods like `setCustomRequestProcessing`
 - playwright tests
 - refactor components

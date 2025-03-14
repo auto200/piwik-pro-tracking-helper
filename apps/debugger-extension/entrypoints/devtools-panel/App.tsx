@@ -35,7 +35,6 @@ export function App() {
 
   const containerRef = useRef<ComponentRef<'div'>>(null);
   const headerRef = useRef<ComponentRef<'div'>>(null);
-  const trackingEndpointsRef = useRef<{ _paq: string[]; _ppas: string[] }>({ _paq: [], _ppas: [] });
 
   useLayoutEffect(() => {
     const abortController = new AbortController();
@@ -69,7 +68,6 @@ export function App() {
 
   return (
     <div ref={containerRef}>
-      {JSON.stringify(trackingEndpointsRef.current)}
       {/* header */}
       <div ref={headerRef} className="flex">
         <Button
