@@ -14,9 +14,10 @@ export default defineBackground(() => {
     }
     if (devToolsPort.error) {
       console.log(devToolsPort.error);
-      return;
+      return true;
     }
     devToolsPort.postMessage(request);
+    return true;
   });
 
   // to devtools panel
@@ -28,6 +29,4 @@ export default defineBackground(() => {
       devToolsPort = undefined;
     });
   });
-
-  return true;
 });

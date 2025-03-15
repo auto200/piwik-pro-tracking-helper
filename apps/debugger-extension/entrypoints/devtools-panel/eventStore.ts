@@ -73,7 +73,7 @@ port.onMessage.addListener(function (_msg) {
 
   if (msg.type === 'JSTC_LOADED_PAQ' || msg.type === 'JSTC_LOADED_PPAS') {
     handleJSTCLoaded(msg.type);
-    return;
+    return true;
   }
 
   if (msg.type !== 'PAQ_ENTRY' && msg.type !== 'PPAS_ENTRY') return true;

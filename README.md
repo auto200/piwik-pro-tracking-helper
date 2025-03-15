@@ -1,4 +1,30 @@
-# TODO
+# Piwik PRO JSTC Helper
+
+### Inspect commands sent to the JSTC and outgoing network events
+
+![alt text](/docs/preview.png)
+
+- supports both `_paq` and `_ppas` queues
+- easy to recognize event types
+- preview event payload
+
+# Browser support
+
+| Browser name | Browser version | Status                 |
+| ------------ | --------------- | ---------------------- |
+| Chrome       | latest          | 🚧 works on my machine |
+| Firefox      | latest          | 🚧 works on my machine |
+
+# How to install
+
+Go to [releases](https://github.com/auto200/piwik-pro-jstc-debugger/releases) and download latest extension version for firefox or chrome
+
+- chrome - extract zip and [follow instructions](https://webkul.com/blog/how-to-install-the-unpacked-extension-in-chrome/)
+- firefox - [follow instructions](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/)
+
+---
+
+### TODO
 
 - detection if JSTC is on the page - currently we display nothing
 - scope events to specific page - if you have multiple pages open, all events from every page will be shown in the debugger
@@ -11,94 +37,9 @@
 - show total number of events and network events
 - autoscrolling event list upon new event
 - pretty icon next to network events like in tracker debugger
-- events order - newest/oldest first
+- events order toggle - newest/oldest first
 - support for viewing direct method calls on tracker object, currently we only have information on \_paq/\_ppas.push()
 - formatting and syntax highlighting for functions - pushed to queue and to methods like `setCustomRequestProcessing`
 - playwright tests
 - refactor components
 - setup eslint
-
-# Turborepo starter
-
-This is an official starter Turborepo.
-
-## Using this example
-
-Run the following command:
-
-```sh
-npx create-turbo@latest
-```
-
-## What's inside?
-
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm build
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm dev
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-npx turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-npx turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)

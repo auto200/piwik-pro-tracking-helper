@@ -117,7 +117,7 @@ export function App() {
               <TableHeader className="sticky top-0 z-10 bg-slate-100">
                 <TableRow>
                   <TableHead>Event name</TableHead>
-                  <TableHead>Payload</TableHead>
+                  <TableHead>Details</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
