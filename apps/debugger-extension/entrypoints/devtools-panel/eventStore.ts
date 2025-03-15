@@ -61,11 +61,11 @@ function handleJSTCLoaded(queueName: 'JSTC_LOADED_PAQ' | 'JSTC_LOADED_PPAS') {
 const port = browser.runtime.connect({ name: 'devtools' });
 port.onMessage.addListener(function (_msg) {
   const msg = _msg as Message;
-  if (msg.source !== 'JSTC_DBG') return true;
+  if (msg.source !== 'JSTC_DBG') return false;
   if (msg.type === 'PAGE_METADATA') {
     pageOrigin = msg.payload.origin;
     allRequests.length = 0;
-    return true;
+    return false;
   }
 
   messages = [...messages, { ...msg, id: crypto.randomUUID() }];
@@ -73,14 +73,14 @@ port.onMessage.addListener(function (_msg) {
 
   if (msg.type === 'JSTC_LOADED_PAQ' || msg.type === 'JSTC_LOADED_PPAS') {
     handleJSTCLoaded(msg.type);
-    return true;
+    return false;
   }
 
-  if (msg.type !== 'PAQ_ENTRY' && msg.type !== 'PPAS_ENTRY') return true;
+  if (msg.type !== 'PAQ_ENTRY' && msg.type !== 'PPAS_ENTRY') return false;
 
   const [name, trackerUrl] = msg.payload.data;
-  if (name !== 'setTrackerUrl') return true;
-  if (typeof trackerUrl !== 'string') return true;
+  if (name !== 'setTrackerUrl') return false;
+  if (typeof trackerUrl !== 'string') return false;
 
   let parsedUrl = '';
 
@@ -94,7 +94,7 @@ port.onMessage.addListener(function (_msg) {
     parsedUrl = new URL(pageOrigin).origin + '/' + trackerUrl;
   }
 
-  if (!parsedUrl) return true;
+  if (!parsedUrl) return false;
 
   if (msg.type === 'PAQ_ENTRY') {
     if (!_paqTrackingEndpoints.includes(parsedUrl)) {
@@ -105,7 +105,7 @@ port.onMessage.addListener(function (_msg) {
       _ppasTrackingEndpoints.push(parsedUrl);
     }
   }
-  return true;
+  return false;
 });
 
 const allRequests: any[] = [];

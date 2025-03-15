@@ -8,16 +8,16 @@ export default defineBackground(() => {
   // from forwarder
   // @ts-expect-error lol
   browser.runtime.onMessage.addListener((request: Message | undefined) => {
-    if (request?.source !== 'JSTC_DBG') return true;
+    if (request?.source !== 'JSTC_DBG') return false;
     if (!devToolsPort) {
-      return true;
+      return false;
     }
     if (devToolsPort.error) {
       console.log(devToolsPort.error);
-      return true;
+      return false;
     }
     devToolsPort.postMessage(request);
-    return true;
+    return false;
   });
 
   // to devtools panel
