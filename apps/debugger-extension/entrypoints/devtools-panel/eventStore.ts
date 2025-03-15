@@ -12,7 +12,7 @@ const _paqTrackingEndpoints: string[] = [];
 const _ppasTrackingEndpoints: string[] = [];
 
 function paqNetworkHandler(request: any) {
-  const msg: Entry | undefined = _paqTrackingEndpoints.includes(request.request.url)
+  const msg = _paqTrackingEndpoints.includes(request.request.url)
     ? getNetworkEntry(request, 'PAQ_NETWORK_EVENT')
     : undefined;
   if (msg) {
@@ -21,7 +21,7 @@ function paqNetworkHandler(request: any) {
   }
 }
 function ppasNetworkHandler(request: any) {
-  const msg: Entry | undefined = _ppasTrackingEndpoints.includes(request.request.url)
+  const msg = _ppasTrackingEndpoints.includes(request.request.url)
     ? getNetworkEntry(request, 'PPAS_NETWORK_EVENT')
     : undefined;
   if (msg) {
@@ -39,7 +39,7 @@ function handleJSTCLoaded(queueName: 'JSTC_LOADED_PAQ' | 'JSTC_LOADED_PPAS') {
   // reprocess queue
   const newMessages: Entry[] = [];
   for (const request of allRequests) {
-    const msg: Entry | undefined = queueTrackingEndpoints.includes(request.request.url)
+    const msg = queueTrackingEndpoints.includes(request.request.url)
       ? getNetworkEntry(request, networkEventName)
       : undefined;
     if (msg) {
@@ -70,6 +70,7 @@ port.onMessage.addListener(function (_msg) {
 
   messages = [...messages, { ...msg, id: crypto.randomUUID() }];
   emitChange();
+
   if (msg.type === 'JSTC_LOADED_PAQ' || msg.type === 'JSTC_LOADED_PPAS') {
     handleJSTCLoaded(msg.type);
     return;
@@ -128,6 +129,8 @@ export const eventStore = {
     pageOrigin = '';
     allRequests.length = 0;
     emitChange();
+    browser.devtools.network.onRequestFinished.removeListener(paqNetworkHandler);
+    browser.devtools.network.onRequestFinished.removeListener(ppasNetworkHandler);
   },
 };
 
@@ -140,64 +143,32 @@ function emitChange() {
 function getNetworkEntry(
   request: any,
   eventType: 'PAQ_NETWORK_EVENT' | 'PPAS_NETWORK_EVENT'
-): Entry | undefined {
+): Entry {
   const isBatchRequest = request.request.postData?.text.startsWith('{"requests":[');
 
-  if (eventType === 'PAQ_NETWORK_EVENT') {
-    if (isBatchRequest) {
-      return {
-        source: 'JSTC_DBG',
-        type: 'PAQ_NETWORK_EVENT',
-        payload: {
-          type: 'BATCH',
-          url: request.request.url,
-          requestsParams: (JSON.parse(request.request.postData?.text).requests as string[]).map(
-            (r) => [...new URLSearchParams(r).entries()].map(([name, value]) => ({ name, value }))
-          ),
-        },
-        id: crypto.randomUUID(),
-      };
-    } else {
-      return {
-        source: 'JSTC_DBG',
-        type: 'PAQ_NETWORK_EVENT',
-        payload: {
-          type: 'SINGLE',
-          url: request.request.url,
-          params: request.request.postData?.params ?? [],
-        },
-        id: crypto.randomUUID(),
-      };
-    }
+  if (isBatchRequest) {
+    return {
+      source: 'JSTC_DBG',
+      type: eventType,
+      payload: {
+        type: 'BATCH',
+        url: request.request.url,
+        requestsParams: (JSON.parse(request.request.postData?.text).requests as string[]).map((r) =>
+          [...new URLSearchParams(r).entries()].map(([name, value]) => ({ name, value }))
+        ),
+      },
+      id: crypto.randomUUID(),
+    };
+  } else {
+    return {
+      source: 'JSTC_DBG',
+      type: eventType,
+      payload: {
+        type: 'SINGLE',
+        url: request.request.url,
+        params: request.request.postData?.params ?? [],
+      },
+      id: crypto.randomUUID(),
+    };
   }
-
-  if (eventType === 'PPAS_NETWORK_EVENT') {
-    if (isBatchRequest) {
-      return {
-        source: 'JSTC_DBG',
-        type: 'PPAS_NETWORK_EVENT',
-        payload: {
-          type: 'BATCH',
-          url: request.request.url,
-          requestsParams: (JSON.parse(request.request.postData?.text).requests as string[]).map(
-            (r) => [...new URLSearchParams(r).entries()].map(([name, value]) => ({ name, value }))
-          ),
-        },
-        id: crypto.randomUUID(),
-      };
-    } else {
-      return {
-        source: 'JSTC_DBG',
-        type: 'PPAS_NETWORK_EVENT',
-        payload: {
-          type: 'SINGLE',
-          url: request.request.url,
-          params: request.request.postData?.params ?? [],
-        },
-        id: crypto.randomUUID(),
-      };
-    }
-  }
-
-  return undefined;
 }
