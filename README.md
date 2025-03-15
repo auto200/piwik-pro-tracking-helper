@@ -11,7 +11,7 @@
 # Browser support
 
 | Browser name | Browser version | Status                 |
-| ------------ | --------------- | ---------------------- |
+| :----------- | :-------------- | :--------------------- |
 | Chrome       | latest          | 🚧 works on my machine |
 | Firefox      | latest          | 🚧 works on my machine |
 
@@ -21,6 +21,14 @@ Go to [releases](https://github.com/auto200/piwik-pro-jstc-debugger/releases) an
 
 - chrome - extract zip and [follow instructions](https://webkul.com/blog/how-to-install-the-unpacked-extension-in-chrome/)
 - firefox - [follow instructions](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/)
+
+# How to use
+
+- install extension
+- open page that has Piwik PRO installed
+- open devtools and click on "Piwk PRO JSTC Debugger" tab
+- refresh the page
+- see results in devtools panel
 
 ---
 
