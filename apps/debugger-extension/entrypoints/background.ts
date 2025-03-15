@@ -12,7 +12,10 @@ export default defineBackground(() => {
     if (!devToolsPort) {
       return true;
     }
-
+    if (devToolsPort.error) {
+      console.log(devToolsPort.error);
+      return;
+    }
     devToolsPort.postMessage(request);
   });
 
@@ -20,6 +23,10 @@ export default defineBackground(() => {
   browser.runtime.onConnect.addListener((port) => {
     console.assert(port.name === 'devtools');
     devToolsPort = port;
+
+    devToolsPort.onDisconnect.addListener(() => {
+      devToolsPort = undefined;
+    });
   });
 
   return true;
