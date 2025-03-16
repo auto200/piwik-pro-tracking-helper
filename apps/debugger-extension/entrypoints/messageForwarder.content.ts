@@ -1,6 +1,6 @@
 import { Message } from '@/lib/messaging';
-import { browser } from 'wxt/browser';
 import { defineContentScript } from 'wxt/sandbox';
+import { sendMessage } from 'webext-bridge/content-script';
 
 export default defineContentScript({
   matches: ['<all_urls>'],
@@ -8,11 +8,7 @@ export default defineContentScript({
   main() {
     window.addEventListener('message', (ev: MessageEvent<Message>) => {
       if (ev.data.source === 'JSTC_DBG') {
-        try {
-          browser.runtime.sendMessage(ev.data);
-        } catch (e) {
-          console.log(e);
-        }
+        sendMessage('JSTC_EVENT', ev.data, 'devtools');
       }
     });
   },

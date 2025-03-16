@@ -1,5 +1,6 @@
 import { Message } from '@/lib/messaging';
 import { browser } from 'wxt/browser';
+import { onMessage } from 'webext-bridge/devtools';
 
 export type Entry = Message & { id: string };
 
@@ -58,14 +59,13 @@ function handleJSTCLoaded(queueName: 'JSTC_LOADED_PAQ' | 'JSTC_LOADED_PPAS') {
     browser.devtools.network.onRequestFinished.addListener(ppasNetworkHandler);
   }
 }
-const port = browser.runtime.connect({ name: 'devtools' });
-port.onMessage.addListener(function (_msg) {
-  const msg = _msg as Message;
-  if (msg.source !== 'JSTC_DBG') return false;
+
+onMessage('JSTC_EVENT', function ({ data: msg }) {
+  if (msg.source !== 'JSTC_DBG') return;
   if (msg.type === 'PAGE_METADATA') {
     pageOrigin = msg.payload.origin;
     allRequests.length = 0;
-    return false;
+    return;
   }
 
   messages = [...messages, { ...msg, id: crypto.randomUUID() }];
@@ -73,14 +73,14 @@ port.onMessage.addListener(function (_msg) {
 
   if (msg.type === 'JSTC_LOADED_PAQ' || msg.type === 'JSTC_LOADED_PPAS') {
     handleJSTCLoaded(msg.type);
-    return false;
+    return;
   }
 
-  if (msg.type !== 'PAQ_ENTRY' && msg.type !== 'PPAS_ENTRY') return false;
+  if (msg.type !== 'PAQ_ENTRY' && msg.type !== 'PPAS_ENTRY') return;
 
   const [name, trackerUrl] = msg.payload.data;
-  if (name !== 'setTrackerUrl') return false;
-  if (typeof trackerUrl !== 'string') return false;
+  if (name !== 'setTrackerUrl') return;
+  if (typeof trackerUrl !== 'string') return;
 
   let parsedUrl = '';
 
@@ -94,7 +94,7 @@ port.onMessage.addListener(function (_msg) {
     parsedUrl = new URL(pageOrigin).origin + '/' + trackerUrl;
   }
 
-  if (!parsedUrl) return false;
+  if (!parsedUrl) return;
 
   if (msg.type === 'PAQ_ENTRY') {
     if (!_paqTrackingEndpoints.includes(parsedUrl)) {
@@ -105,7 +105,7 @@ port.onMessage.addListener(function (_msg) {
       _ppasTrackingEndpoints.push(parsedUrl);
     }
   }
-  return false;
+  return;
 });
 
 const allRequests: any[] = [];
