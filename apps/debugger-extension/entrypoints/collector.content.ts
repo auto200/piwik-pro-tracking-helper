@@ -51,25 +51,22 @@ export default defineContentScript({
           }
 
           if (is_queueProxy(value)) {
-            const message: Message = { type: loadedEventType, source: 'JSTC_DBG' };
+            sendMessage({ type: loadedEventType, source: 'JSTC_DBG' });
 
-            sendMessage(message);
             internal_queue = value;
             const originalPush = value.push;
             value.push = (args) => {
               if (!Array.isArray(args)) {
                 console.log(`[JSTC DEBUGGER] some invalid value pushed to the ${queueName}`);
               } else {
-                const message: Message = {
+                sendMessage({
                   type: messageEventType,
                   source: 'JSTC_DBG',
                   payload: {
                     data: args.map((e) => (typeof e === 'function' ? e.toString() : e)) as any,
                     stack: new Error().stack,
                   },
-                };
-
-                sendMessage(message);
+                });
               }
               originalPush(args);
             };
@@ -96,12 +93,11 @@ export default defineContentScript({
           if (Array.isArray(internal_queue)) {
             // TODO: send message that JSTC has been initialized
             internal_queue.forEach((p) => {
-              const message: Message = {
+              sendMessage({
                 source: 'JSTC_DBG',
                 type: messageEventType,
                 payload: { data: p as any, stack: new Error().stack },
-              };
-              sendMessage(message);
+              });
             });
           }
           internalObjectName = value;
