@@ -243,7 +243,7 @@ export function App() {
           <>
             <PanelResizeHandle className="basis-[0.15rem] bg-slate-400" />
             <Panel order={2}>
-              <div className="h-full overflow-auto bg-slate-100">
+              <div className="h-full overflow-auto bg-slate-100 text-sm">
                 <div className="sticky top-0 border-b-2 border-slate-300 bg-slate-100">
                   <Button
                     variant="ghost"
@@ -311,12 +311,17 @@ export function App() {
                                     supported and displayed as broken events.
                                   </div>
                                 )}
-                              <div>
+                              <div className="mt-2">
                                 <b>Parameters:</b>
                                 <Separator />
                                 {selectedMessage.payload.params.map((e, i) => (
-                                  <div key={i}>
-                                    {e.name}: <span className="font-bold">{e.value}</span>
+                                  <div key={i} className="flex">
+                                    <span className="font-bold text-slate-600">{e.name}: </span>
+                                    <span className="ml-[1ch] break-words">
+                                      {import.meta.env.CHROME
+                                        ? decodeURIComponent(e.value)
+                                        : e.value}
+                                    </span>
                                   </div>
                                 ))}
                               </div>

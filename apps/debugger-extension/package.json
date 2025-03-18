@@ -2,7 +2,7 @@
   "name": "jstc-debugger-extension",
   "description": "Inspect commands sent to the JSTC and outgoing network events",
   "private": true,
-  "version": "0.0.7",
+  "version": "0.0.8",
   "type": "module",
   "scripts": {
     "dev": "wxt",
