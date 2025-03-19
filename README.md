@@ -26,7 +26,7 @@ Go to [releases](https://github.com/auto200/piwik-pro-jstc-debugger/releases) an
 
 - install extension
 - open page that has Piwik PRO installed
-- open devtools and click on "Piwk PRO JSTC Debugger" tab
+- open devtools (reopen if opened before) and click on "Piwk PRO JSTC Debugger" tab
 - refresh the page
 - see results in devtools panel
 
