@@ -5,6 +5,7 @@ import {
   useState,
   useLayoutEffect,
   useSyncExternalStore,
+  useMemo,
 } from 'react';
 import '@/assets/tailwind.css';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
@@ -25,16 +26,28 @@ import { useExtensionVersionMaybeNotLatest } from './hooks/useExtensionVersionMa
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
 import { eventStore } from './eventStore';
+import { Badge } from '@/components/ui/badge';
 
 type Entry = Message & { id: string };
 
+type Filters = Array<'PAQ_ENTRY' | 'PPAS_ENTRY' | 'PAQ_NETWORK_EVENT' | 'PPAS_NETWORK_EVENT'>;
+
 export function App() {
-  const msgs = useSyncExternalStore(eventStore.subscribe, eventStore.getSnapshot);
+  const _msgs = useSyncExternalStore(eventStore.subscribe, eventStore.getSnapshot);
   const [selectedMessage, setSelectedMessage] = useState<Entry | undefined>();
   const extensionMaybeNotLatest = useExtensionVersionMaybeNotLatest();
+  const [filters, setFilters] = useState<Filters>([]);
 
   const containerRef = useRef<ComponentRef<'div'>>(null);
   const headerRef = useRef<ComponentRef<'div'>>(null);
+
+  const msgs = useMemo(() => {
+    if (filters.length === 0) return _msgs;
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    return _msgs.filter((msg) => filters.includes(msg.type));
+  }, [_msgs, filters]);
 
   useLayoutEffect(() => {
     const abortController = new AbortController();
@@ -66,12 +79,27 @@ export function App() {
     };
   }, []);
 
+  const handleFilterChange = (filter: Filters[number] | undefined) => {
+    if (!filter) {
+      setFilters([]);
+      return;
+    }
+
+    if (filters.includes(filter)) {
+      setFilters((filters) => filters.filter((f) => f !== filter));
+      return;
+    }
+
+    setFilters((filters) => [...filters, filter]);
+  };
+
   return (
     <div ref={containerRef}>
       {/* header */}
-      <div ref={headerRef} className="flex">
+      <div ref={headerRef} className="flex items-center overflow-hidden">
         <Button
           variant="outline"
+          size="sm"
           onClick={() => {
             eventStore.clear();
             setSelectedMessage(undefined);
@@ -80,6 +108,76 @@ export function App() {
           <CircleX />
           <span>reset</span>
         </Button>
+
+        {/* filters */}
+        <div className="ml-5 flex select-none items-center gap-1">
+          <Badge
+            variant="outline"
+            className={cn(
+              filters.length === 0 ? 'bg-blue-200' : 'hover:bg-slate-300',
+              'cursor-pointer'
+            )}
+            onClick={() => handleFilterChange(undefined)}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z" />
+            </svg>
+            All
+          </Badge>
+          <div className="h-4 w-[1px] bg-slate-600">⠀</div>
+          <Badge
+            variant="outline"
+            className={cn(
+              filters.includes('PAQ_ENTRY') ? 'bg-blue-200' : 'hover:bg-slate-300',
+              'cursor-pointer'
+            )}
+            onClick={() => handleFilterChange('PAQ_ENTRY')}
+          >
+            <ArrowRight size={12} className="text-green-500" />
+            _paq
+          </Badge>
+          <Badge
+            variant="outline"
+            className={cn(
+              filters.includes('PAQ_NETWORK_EVENT') ? 'bg-blue-200' : 'hover:bg-slate-300',
+              'cursor-pointer'
+            )}
+            onClick={() => handleFilterChange('PAQ_NETWORK_EVENT')}
+          >
+            <ArrowUpDown size={12} className="text-green-700" /> _paq
+          </Badge>
+          <Badge
+            variant="outline"
+            className={cn(
+              filters.includes('PPAS_ENTRY') ? 'bg-blue-200' : 'hover:bg-slate-300',
+              'cursor-pointer'
+            )}
+            onClick={() => handleFilterChange('PPAS_ENTRY')}
+          >
+            <ArrowRight size={12} className="text-purple-400" />
+            _ppas
+          </Badge>
+          <Badge
+            variant="outline"
+            className={cn(
+              filters.includes('PPAS_NETWORK_EVENT') ? 'bg-blue-200' : 'hover:bg-slate-300',
+              'cursor-pointer'
+            )}
+            onClick={() => handleFilterChange('PPAS_NETWORK_EVENT')}
+          >
+            <ArrowUpDown size={12} className="text-purple-500" /> _ppas
+          </Badge>
+        </div>
 
         <div className="ml-auto mr-1 flex gap-2">
           {extensionMaybeNotLatest && (

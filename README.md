@@ -35,7 +35,6 @@ Go to [releases](https://github.com/auto200/piwik-pro-jstc-debugger/releases) an
 ### TODO
 
 - detection if JSTC is on the page - currently we display nothing
-- filters
 - payload validation for events and network events
 - grouping parameters in network event details
 - better display of parameters
