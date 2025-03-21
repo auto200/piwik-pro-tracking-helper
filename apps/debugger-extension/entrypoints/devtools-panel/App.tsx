@@ -80,6 +80,8 @@ export function App() {
   }, []);
 
   const handleFilterChange = (filter: Filters[number] | undefined) => {
+    setSelectedMessage(undefined);
+
     if (!filter) {
       setFilters([]);
       return;
