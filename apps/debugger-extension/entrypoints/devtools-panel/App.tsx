@@ -7,25 +7,14 @@ import {
   useState,
   useSyncExternalStore,
 } from 'react';
-import { ArrowRight, ArrowUpDown, XCircle } from 'lucide-react';
+import { XCircle } from 'lucide-react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { getEventType } from '@/lib/eventDetector';
-import { Message } from '@/lib/messaging';
-import { cn } from '@/lib/utils';
 import { Header } from './components/Header';
-import { eventStore } from './eventStore';
-
-type Entry = Message & { id: string };
+import { Entry, eventStore } from './eventStore';
+import { EventList } from './components/EventList';
 
 export type Filters = Array<
   'PAQ_ENTRY' | 'PPAS_ENTRY' | 'PAQ_NETWORK_EVENT' | 'PPAS_NETWORK_EVENT'
@@ -95,131 +84,11 @@ export function App() {
       <PanelGroup direction="horizontal" autoSaveId="JSTC_DBG_PANELS">
         {/* left panel */}
         <Panel order={1} minSize={25}>
-          <div className="h-full overflow-auto">
-            <Table>
-              <TableHeader className="sticky top-0 z-10 bg-slate-100">
-                <TableRow>
-                  <TableHead>Event name</TableHead>
-                  <TableHead>Details</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {msgs.map((msg, i) => {
-                  switch (msg.type) {
-                    case 'JSTC_LOADED_PAQ': {
-                      return (
-                        <TableRow key={i}>
-                          <TableCell colSpan={2} className="font-semibold text-green-600">
-                            JSTC LOADED (_paq)
-                          </TableCell>
-                        </TableRow>
-                      );
-                    }
-                    case 'JSTC_LOADED_PPAS': {
-                      return (
-                        <TableRow key={i}>
-                          <TableCell colSpan={2} className="font-semibold text-purple-600">
-                            JSTC LOADED (_ppas)
-                          </TableCell>
-                        </TableRow>
-                      );
-                    }
-                    case 'PAQ_NETWORK_EVENT':
-                    case 'PPAS_NETWORK_EVENT': {
-                      return (
-                        <TableRow
-                          key={i}
-                          onClick={() => setSelectedMessage(msg)}
-                          className={cn('cursor-default', {
-                            'bg-slate-300 hover:bg-slate-300': selectedMessage?.id === msg.id,
-                          })}
-                        >
-                          <TableCell className="flex items-center gap-1">
-                            <span>
-                              <ArrowUpDown
-                                className={
-                                  msg.type === 'PAQ_NETWORK_EVENT'
-                                    ? 'text-green-700'
-                                    : 'text-purple-500'
-                                }
-                                size={18}
-                              />
-                            </span>
-                            {msg.type === 'PAQ_NETWORK_EVENT' ? '_paq ' : '_ppas'}
-                            {msg.payload.type === 'BATCH' ? (
-                              msg.payload.requestsParams.map((params, i) => (
-                                <span
-                                  key={i}
-                                  className={cn(
-                                    getEventType(params) === 'Broken Event' &&
-                                      'font-bold text-red-600'
-                                  )}
-                                >
-                                  {getEventType(params)}
-                                </span>
-                              ))
-                            ) : (
-                              <span
-                                className={cn(
-                                  getEventType(msg.payload.params) === 'Broken Event' &&
-                                    'font-bold text-red-600'
-                                )}
-                              >
-                                {getEventType(msg.payload.params)}
-                              </span>
-                            )}
-                          </TableCell>
-                          <TableCell>{msg.payload.url}</TableCell>
-                        </TableRow>
-                      );
-                    }
-                    case 'PAQ_ENTRY':
-                    case 'PPAS_ENTRY': {
-                      const params = msg.payload.data.slice(1, msg.payload.data.length);
-                      return (
-                        <TableRow
-                          key={i}
-                          onClick={() => setSelectedMessage(msg)}
-                          className={cn('cursor-default', {
-                            'bg-slate-300 hover:bg-slate-300': selectedMessage?.id === msg.id,
-                          })}
-
-                          // onClick={() => {
-                          //   browser.devtools.panels.openResource(
-                          //     'chrome-extension://lheofohbkhphjehlmohenmocgcojbalm/content-scripts/collector.js',
-                          //     67,
-                          //     44
-                          //   );
-                          // }}
-                        >
-                          <TableCell className="flex items-center gap-1">
-                            <span>
-                              <ArrowRight
-                                className={`${msg.type === 'PAQ_ENTRY' ? 'text-green-300' : 'text-purple-400'} opacity-80`}
-                                size={18}
-                              />
-                            </span>
-                            {msg.type === 'PAQ_ENTRY' ? '[_paq] ' : '[_ppas] '}
-                            <span>{msg.payload.data[0]}</span>
-                          </TableCell>
-                          <TableCell>
-                            {params.length === 0 ? '-' : JSON.stringify(params)}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    }
-                    case 'PAGE_METADATA': {
-                      return;
-                    }
-                    default: {
-                      // @ts-expect-error dummy check for now
-                      throw new Error(`unhandled event ${msg.type}`);
-                    }
-                  }
-                })}
-              </TableBody>
-            </Table>
-          </div>
+          <EventList
+            msgs={msgs}
+            selectedMessage={selectedMessage}
+            setSelectedMessage={setSelectedMessage}
+          />
         </Panel>
         {/* right panel */}
         {selectedMessage && (
