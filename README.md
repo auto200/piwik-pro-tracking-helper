@@ -47,5 +47,4 @@ Go to [releases](https://github.com/auto200/piwik-pro-jstc-debugger/releases) an
 - support for viewing direct method calls on tracker object, currently we only have information on \_paq/\_ppas.push()
 - formatting and syntax highlighting for functions - pushed to queue and to methods like `setCustomRequestProcessing`
 - playwright tests
-- refactor components
 - setup eslint
