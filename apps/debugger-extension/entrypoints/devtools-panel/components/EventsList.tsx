@@ -11,13 +11,13 @@ import { cn } from '@/lib/utils';
 import { ArrowRight, ArrowUpDown } from 'lucide-react';
 import { Entry } from '../eventStore';
 
-type EventListProps = {
+type EventsListProps = {
   msgs: Entry[];
   selectedMessage: Entry | undefined;
   setSelectedMessage: (msg: Entry | undefined) => void;
 };
 
-export function EventList({ msgs, selectedMessage, setSelectedMessage }: EventListProps) {
+export function EventsList({ msgs, selectedMessage, setSelectedMessage }: EventsListProps) {
   return (
     <div className="h-full overflow-auto">
       <Table>

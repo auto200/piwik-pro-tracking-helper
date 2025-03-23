@@ -35,13 +35,12 @@ Go to [releases](https://github.com/auto200/piwik-pro-jstc-debugger/releases) an
 ### TODO
 
 - detection if JSTC is on the page - currently we display nothing
+- autoscrolling event list upon new event
 - payload validation for events and network events
 - grouping parameters in network event details
 - better display of parameters
 - highlight significant params that contributed to event detection https://help.piwik.pro/support/questions/what-are-events-and-how-are-they-detected/#how-event-types-are-detected
 - settings & persistence
-- show total number of events and network events
-- autoscrolling event list upon new event
 - pretty icon next to network events like in tracker debugger
 - events order toggle - newest/oldest first
 - support for viewing direct method calls on tracker object, currently we only have information on \_paq/\_ppas.push()

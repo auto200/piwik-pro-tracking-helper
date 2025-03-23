@@ -9,8 +9,9 @@ import {
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { Header } from './components/Header';
 import { Entry, eventStore } from './eventStore';
-import { EventList } from './components/EventList';
+import { EventsList } from './components/EventsList';
 import { EventDetails } from './components/EventDetails';
+import { EventsSummary } from './components/EventsSummary';
 
 export type Filters = Array<
   'PAQ_ENTRY' | 'PPAS_ENTRY' | 'PAQ_NETWORK_EVENT' | 'PPAS_NETWORK_EVENT'
@@ -78,12 +79,13 @@ export function App() {
       />
 
       <PanelGroup direction="horizontal" autoSaveId="JSTC_DBG_PANELS">
-        <Panel order={1} id="event-list" minSize={25}>
-          <EventList
+        <Panel order={1} id="event-list" minSize={25} className="flex flex-col">
+          <EventsList
             msgs={msgs}
             selectedMessage={selectedMessage}
             setSelectedMessage={setSelectedMessage}
           />
+          <EventsSummary msgs={msgs} />
         </Panel>
 
         {selectedMessage && (
