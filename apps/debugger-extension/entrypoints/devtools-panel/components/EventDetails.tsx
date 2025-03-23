@@ -48,9 +48,11 @@ function EventDetail({ selectedMessage }: EventDetailProps) {
           </div>
           <div>
             parameters:{' '}
-            {JSON.stringify(
-              selectedMessage.payload.data.slice(1, selectedMessage.payload.data.length)
-            )}
+            <span className="font-bold">
+              {JSON.stringify(
+                selectedMessage.payload.data.slice(1, selectedMessage.payload.data.length)
+              )}
+            </span>
           </div>
           <div className="mt-2">
             <div className="font-bold">What triggered this event?</div>
