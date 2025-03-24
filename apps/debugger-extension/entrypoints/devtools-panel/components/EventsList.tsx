@@ -1,3 +1,4 @@
+import { Ref } from 'react';
 import {
   Table,
   TableBody,
@@ -15,11 +16,12 @@ type EventsListProps = {
   msgs: Entry[];
   selectedMessage: Entry | undefined;
   setSelectedMessage: (msg: Entry | undefined) => void;
+  ref: Ref<HTMLDivElement>;
 };
 
-export function EventsList({ msgs, selectedMessage, setSelectedMessage }: EventsListProps) {
+export function EventsList({ ref, msgs, selectedMessage, setSelectedMessage }: EventsListProps) {
   return (
-    <div className="h-full overflow-auto">
+    <div ref={ref} className="h-full overflow-auto">
       <Table>
         <TableHeader className="sticky top-0 z-10 bg-slate-100">
           <TableRow>

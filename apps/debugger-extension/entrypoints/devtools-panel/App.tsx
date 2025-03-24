@@ -12,6 +12,7 @@ import { Entry, eventStore } from './eventStore';
 import { EventsList } from './components/EventsList';
 import { EventDetails } from './components/EventDetails';
 import { EventsSummary } from './components/EventsSummary';
+import { useEventsListAutoscroll } from './hooks/useEventsListAutoscroll';
 
 export type Filters = Array<
   'PAQ_ENTRY' | 'PPAS_ENTRY' | 'PAQ_NETWORK_EVENT' | 'PPAS_NETWORK_EVENT'
@@ -24,7 +25,6 @@ export function App() {
 
   const containerRef = useRef<ComponentRef<'div'>>(null);
   const headerRef = useRef<ComponentRef<'div'>>(null);
-
   const msgs = useMemo(() => {
     if (filters.length === 0) return _msgs;
 
@@ -32,6 +32,7 @@ export function App() {
     // @ts-expect-error
     return _msgs.filter((msg) => filters.includes(msg.type));
   }, [_msgs, filters]);
+  const { eventListContainerRef } = useEventsListAutoscroll(msgs, filters);
 
   useLayoutEffect(() => {
     const abortController = new AbortController();
@@ -81,6 +82,7 @@ export function App() {
       <PanelGroup direction="horizontal" autoSaveId="JSTC_DBG_PANELS">
         <Panel order={1} id="event-list" minSize={25} className="flex flex-col">
           <EventsList
+            ref={eventListContainerRef}
             msgs={msgs}
             selectedMessage={selectedMessage}
             setSelectedMessage={setSelectedMessage}
