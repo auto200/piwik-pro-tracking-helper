@@ -1,4 +1,4 @@
-# Piwik PRO JSTC Helper
+# Piwik PRO JSTC Helper <img src="/docs/logo-transparent.png" width="100" align="right" alt="Piwik PRO Tracking Helper">
 
 ### Inspect commands sent to the JSTC and outgoing network events
 
