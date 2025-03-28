@@ -11,6 +11,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Validate release tag matches extension package.json version
+        working-directory: apps/debugger-extension
+        run: |
+          TAG_NAME=${{ github.event.release.tag_name }}
+          PACKAGE_VERSION=$(jq -r .version package.json)
+          if [ "$TAG_NAME" != "$PACKAGE_VERSION" ]; then
+            echo "Error: Release tag ($TAG_NAME) does not match package.json version ($PACKAGE_VERSION)"
+            exit 1
+          fi
+
       - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v4
