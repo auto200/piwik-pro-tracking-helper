@@ -1,6 +1,6 @@
 {
-  "name": "jstc-debugger-extension",
-  "description": "Inspect commands sent to the JSTC and outgoing network events",
+  "name": "piwik-pro-tracking-helper",
+  "description": "Inspect commands sent to the browser tracker and outgoing network events",
   "private": true,
   "version": "0.0.10",
   "type": "module",

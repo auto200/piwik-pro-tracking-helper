@@ -2,6 +2,9 @@ import { defineConfig } from 'wxt';
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
+  manifest: {
+    name: 'Piwik PRO Tracking Helper',
+  },
   extensionApi: 'webextension-polyfill',
   modules: ['@wxt-dev/module-react'],
   imports: false,

@@ -1,6 +1,6 @@
-# Piwik PRO JSTC Helper <img src="/docs/logo-transparent.png" width="100" align="right" alt="Piwik PRO Tracking Helper">
+# Piwik PRO Tracking Helper <img src="/docs/logo-transparent.png" width="100" align="right" alt="Piwik PRO Tracking Helper">
 
-### Inspect commands sent to the JSTC and outgoing network events
+### Inspect commands sent to the browser tracker and outgoing network events
 
 ![alt text](/docs/preview.png)
 
@@ -10,10 +10,10 @@
 
 # Browser support
 
-| Browser name | Browser version | Status                 |
-| :----------- | :-------------- | :--------------------- |
-| Chrome       | latest          | 🚧 works on my machine |
-| Firefox      | latest          | 🚧 works on my machine |
+| Browser name | Browser version | Status |
+| :----------- | :-------------- | :----- |
+| Chrome       | latest          | ✅     |
+| Firefox      | latest          | ✅     |
 
 # How to install
 
@@ -26,7 +26,7 @@ Go to [releases](https://github.com/auto200/piwik-pro-jstc-debugger/releases) an
 
 - install extension
 - open page that has Piwik PRO installed
-- open devtools (reopen if opened before) and click on "Piwk PRO JSTC Debugger" tab
+- open devtools (reopen if opened before) and click on "Piwik PRO Tracking Helper" tab
 - refresh the page
 - see results in devtools panel
 
@@ -35,6 +35,8 @@ Go to [releases](https://github.com/auto200/piwik-pro-jstc-debugger/releases) an
 ### TODO
 
 - detection if JSTC is on the page - currently we display nothing
+- remove extension outdated notice
+- publish extension to stores
 - payload validation for events and network events
 - grouping parameters in network event details
 - better display of parameters
