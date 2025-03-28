@@ -25,7 +25,7 @@ export function useExtensionVersionMaybeNotLatest() {
     const getLatestRelease = async () => {
       try {
         const res = await fetch(
-          'https://api.github.com/repos/auto200/piwik-pro-jstc-debugger/releases/latest'
+          'https://api.github.com/repos/auto200/piwik-pro-tracking-helper/releases/latest'
         );
         if (!res.ok) return;
         const { tag_name } = (await res.json()) as { tag_name: string };

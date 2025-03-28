@@ -119,7 +119,7 @@ export function Header({ ref, filters, onFiltersChange, reset }: HeaderProps) {
                 asChild
               >
                 <a
-                  href="https://github.com/auto200/piwik-pro-jstc-debugger/releases"
+                  href="https://github.com/auto200/piwik-pro-tracking-helper/releases"
                   target="_blank"
                   rel="noreferrer"
                 >

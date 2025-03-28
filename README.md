@@ -17,7 +17,7 @@
 
 # How to install
 
-Go to [releases](https://github.com/auto200/piwik-pro-jstc-debugger/releases) and download latest extension version for firefox or chrome
+Go to [releases](https://github.com/auto200/piwik-pro-tracking-helper/releases) and download latest extension version for firefox or chrome
 
 - chrome - extract zip and [follow instructions](https://webkul.com/blog/how-to-install-the-unpacked-extension-in-chrome/)
 - firefox - [follow instructions](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/)
