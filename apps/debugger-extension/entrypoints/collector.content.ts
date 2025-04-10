@@ -92,11 +92,17 @@ export default defineContentScript({
         set: function (value) {
           if (Array.isArray(internal_queue)) {
             // TODO: send message that JSTC has been initialized
-            internal_queue.forEach((p) => {
+            internal_queue.forEach((args) => {
+              if (!Array.isArray(args)) {
+                return;
+              }
               sendMessage({
                 source: 'JSTC_DBG',
                 type: messageEventType,
-                payload: { data: p as any, stack: new Error().stack },
+                payload: {
+                  data: args.map((e) => (typeof e === 'function' ? e.toString() : e)) as any,
+                  stack: new Error().stack,
+                },
               });
             });
           }
