@@ -147,9 +147,6 @@ function EventEntryRow({ msg, selectedMessage, setSelectedMessage }: EventEntryR
         </TableRow>
       );
     }
-    case 'PAGE_METADATA': {
-      return;
-    }
     default: {
       // @ts-expect-error dummy check for now
       throw new Error(`unhandled event ${msg.type}`);

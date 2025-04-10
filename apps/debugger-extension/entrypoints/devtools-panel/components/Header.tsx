@@ -1,5 +1,5 @@
 import type { Ref } from 'react';
-import { ArrowRight, ArrowUpDown, CircleX } from 'lucide-react';
+import { ArrowRight, ArrowUpDown, CircleX, RefreshCcw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -10,9 +10,10 @@ type HeaderProps = {
   filters: Filters;
   onFiltersChange: (filters: Filters) => void;
   reset: () => void;
+  onHardReload: () => void;
 };
 
-export function Header({ ref, filters, onFiltersChange, reset }: HeaderProps) {
+export function Header({ ref, filters, onFiltersChange, reset, onHardReload }: HeaderProps) {
   const handleFilterChange = (filter: Filters[number] | undefined) => {
     if (!filter) {
       onFiltersChange([]);
@@ -28,10 +29,13 @@ export function Header({ ref, filters, onFiltersChange, reset }: HeaderProps) {
   };
 
   return (
-    <div ref={ref} className="flex items-center overflow-hidden">
-      <Button variant="outline" size="sm" onClick={reset}>
-        <CircleX />
-        <span>reset</span>
+    <div ref={ref} className="flex items-center overflow-hidden p-[2px]">
+      <Button variant="outline" size="sm" onClick={reset} className="mr-1 h-7">
+        <CircleX /> clear
+      </Button>
+
+      <Button variant="outline" size="sm" onClick={onHardReload} className="h-7">
+        <RefreshCcw /> reload
       </Button>
 
       {/* filters */}
