@@ -2,7 +2,7 @@
   "name": "piwik-pro-tracking-helper",
   "description": "Inspect commands sent to the browser tracker and outgoing network events",
   "private": true,
-  "version": "0.0.12",
+  "version": "0.0.13",
   "type": "module",
   "scripts": {
     "dev": "wxt",
