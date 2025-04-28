@@ -15,6 +15,23 @@
 | Chrome       | latest          | ✅     |
 | Firefox      | latest          | ✅     |
 
+# Build the browser extension
+
+## Requirements:
+
+- Node 20.x
+- pnpm 9.x
+
+```bash
+pnpm install
+
+# Build the Firefox extension (saves in apps/debugger-extension/.output/piwik-pro-tracking-helper-{version}-firefox.zip)
+cd apps/debugger-extension && pnpm run zip:firefox
+
+# Build the Chrome extension (saves in apps/debugger-extension/.output/piwik-pro-tracking-helper-0.0.13-chrome.zip)
+cd apps/debugger-extension &&  pnpm run zip
+```
+
 # How to install
 
 Go to [releases](https://github.com/auto200/piwik-pro-tracking-helper/releases) and download latest extension version for firefox or chrome

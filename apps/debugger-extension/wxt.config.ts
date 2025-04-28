@@ -9,7 +9,7 @@ export default defineConfig({
   modules: ['@wxt-dev/module-react'],
   imports: false,
   zip: {
-    zipSources: false,
+    sourcesRoot: '../../',
   },
   // https://wxt.dev/api/reference/wxt/interfaces/ExtensionRunnerConfig.html
   runner: {
