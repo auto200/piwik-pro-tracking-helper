@@ -34,9 +34,10 @@ Go to [releases](https://github.com/auto200/piwik-pro-tracking-helper/releases) 
 
 ### TODO
 
-- detection if JSTC is on the page - currently we display nothing
 - publish extension to stores
 - payload validation for events and network events
+- add text input for filtering by event name
+- allow for adding custom tracking endpoints, some integrations (like shopify) do not use JSTC, it would be nice to still be able to inspect network events from the extension
 - grouping parameters in network event details
 - better display of parameters
 - highlight significant params that contributed to event detection https://help.piwik.pro/support/questions/what-are-events-and-how-are-they-detected/#how-event-types-are-detected

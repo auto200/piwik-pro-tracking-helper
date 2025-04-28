@@ -1,5 +1,5 @@
 import { defineContentScript } from 'wxt/sandbox';
-import { Message } from '@/lib/messaging';
+import { InternalMessage, Message } from '@/lib/messaging';
 
 // proxy object created when JSTC is loaded
 type _QueueProxy = { push: (args: unknown[]) => void };
@@ -8,9 +8,13 @@ function is_queueProxy(value: unknown): value is _QueueProxy {
   return typeof value === 'object' && value !== null && 'push' in value;
 }
 
-const sendMessage = (msg: Message) => {
+const sendMessage = (msg: Message | InternalMessage) => {
   window.postMessage(msg, '*');
 };
+
+function formatPushArgs(args: any[]) {
+  return args.map((e) => (typeof e === 'function' ? e.toString() : e)) as any;
+}
 
 export default defineContentScript({
   matches: ['<all_urls>'],
@@ -63,7 +67,7 @@ export default defineContentScript({
                   type: messageEventType,
                   source: 'JSTC_DBG',
                   payload: {
-                    data: args.map((e) => (typeof e === 'function' ? e.toString() : e)) as any,
+                    data: formatPushArgs(args),
                     stack: new Error().stack,
                   },
                 });
@@ -100,7 +104,7 @@ export default defineContentScript({
                 source: 'JSTC_DBG',
                 type: messageEventType,
                 payload: {
-                  data: args.map((e) => (typeof e === 'function' ? e.toString() : e)) as any,
+                  data: formatPushArgs(args),
                   stack: new Error().stack,
                 },
               });
