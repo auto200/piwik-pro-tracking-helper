@@ -17,7 +17,9 @@ export function useEventsListAutoscroll(msgs: Entry[], filters: Filters) {
 
     container.addEventListener('scroll', handleScroll);
     return () => container.removeEventListener('scroll', handleScroll);
-  }, []);
+    // it was done like that to fix this mechanism for conditionally rendered container
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventListContainerRef.current]);
 
   useEffect(() => {
     if (!isAutoScrollEnabled) return;
