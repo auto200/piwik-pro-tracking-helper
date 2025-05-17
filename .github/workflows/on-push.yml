@@ -27,3 +27,7 @@ jobs:
       - name: Typecheck
         working-directory: apps/debugger-extension
         run: pnpm typecheck
+
+      - name: Build
+        working-directory: apps/debugger-extension
+        run: pnpm build && pnpm build:firefox
