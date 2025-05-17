@@ -65,6 +65,7 @@ Go to [releases](https://github.com/auto200/piwik-pro-tracking-helper/releases) 
 
 ### TODO
 
+- auto submit upon release to stores on CI
 - payload validation for events and network events
 - add text input for filtering by event name
 - allow for adding custom tracking endpoints, some integrations (like shopify) do not use JSTC, it would be nice to still be able to inspect network events from the extension
