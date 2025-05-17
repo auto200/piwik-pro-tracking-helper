@@ -5,14 +5,13 @@ export default defineConfig({
   manifest: {
     name: 'Piwik PRO Tracking Helper',
   },
-  extensionApi: 'webextension-polyfill',
   modules: ['@wxt-dev/module-react'],
   imports: false,
   zip: {
     sourcesRoot: '../../',
   },
   // https://wxt.dev/api/reference/wxt/interfaces/ExtensionRunnerConfig.html
-  runner: {
+  webExt: {
     startUrls: ['http://piwik.pro'],
     chromiumArgs: ['--auto-open-devtools-for-tabs'],
     openDevtools: true, //firefox only! - background script devtools

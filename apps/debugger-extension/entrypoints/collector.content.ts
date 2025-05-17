@@ -1,4 +1,4 @@
-import { defineContentScript } from 'wxt/sandbox';
+import { defineContentScript } from '#imports';
 import { InternalMessage, Message } from '@/lib/messaging';
 
 // proxy object created when JSTC is loaded

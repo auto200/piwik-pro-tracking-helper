@@ -1,5 +1,5 @@
 import { InternalMessage, Message } from '@/lib/messaging';
-import { defineContentScript } from 'wxt/sandbox';
+import { defineContentScript } from '#imports';
 import { sendMessage } from 'webext-bridge/content-script';
 
 export default defineContentScript({

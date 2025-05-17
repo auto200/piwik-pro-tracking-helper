@@ -1,4 +1,4 @@
-import { defineBackground } from 'wxt/sandbox';
+import { defineBackground } from '#imports';
 import { onMessage } from 'webext-bridge/background';
 import { browser } from 'wxt/browser';
 
