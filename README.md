@@ -10,10 +10,10 @@
 
 # Browser support
 
-| Browser name | Browser version | Status |
-| :----------- | :-------------- | :----- |
-| Chrome       | latest          | ✅     |
-| Firefox      | latest          | ✅     |
+| Browser name                                                                                                  | Browser version | Status |
+| :------------------------------------------------------------------------------------------------------------ | :-------------- | :----- |
+| [Chrome](https://chromewebstore.google.com/detail/piwik-pro-tracking-helper/fkbdlogfdjmpfepbbbjcgcfbgbcfcnne) | latest          | ✅     |
+| [Firefox](https://addons.mozilla.org/en-US/firefox/addon/piwik-pro-tracking-helper/)                          | latest          | ✅     |
 
 # Build the browser extension
 
@@ -28,11 +28,25 @@ pnpm install
 # Build the Firefox extension (saves in apps/debugger-extension/.output/piwik-pro-tracking-helper-{version}-firefox.zip)
 cd apps/debugger-extension && pnpm run zip:firefox
 
-# Build the Chrome extension (saves in apps/debugger-extension/.output/piwik-pro-tracking-helper-0.0.13-chrome.zip)
+# Build the Chrome extension (saves in apps/debugger-extension/.output/piwik-pro-tracking-helper-{version}-chrome.zip)
 cd apps/debugger-extension &&  pnpm run zip
 ```
 
+# Development
+
+```bash
+cd apps/debugger-extension
+pnpm dev
+# or pnpm dev:firefox
+```
+
 # How to install
+
+Extension is available through [Firefox add-ons](https://addons.mozilla.org/en-US/firefox/addon/piwik-pro-tracking-helper/) or [Chrome web store](https://chromewebstore.google.com/detail/piwik-pro-tracking-helper/fkbdlogfdjmpfepbbbjcgcfbgbcfcnne)
+
+---
+
+OR
 
 Go to [releases](https://github.com/auto200/piwik-pro-tracking-helper/releases) and download latest extension version for firefox or chrome
 
@@ -51,7 +65,6 @@ Go to [releases](https://github.com/auto200/piwik-pro-tracking-helper/releases) 
 
 ### TODO
 
-- publish extension to stores
 - payload validation for events and network events
 - add text input for filtering by event name
 - allow for adding custom tracking endpoints, some integrations (like shopify) do not use JSTC, it would be nice to still be able to inspect network events from the extension
