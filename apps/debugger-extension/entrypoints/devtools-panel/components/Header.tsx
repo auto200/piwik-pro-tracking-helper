@@ -1,9 +1,10 @@
 import type { Ref } from 'react';
-import { ArrowRight, ArrowUpDown, Ban, RefreshCcw } from 'lucide-react';
+import { ArrowRight, ArrowUpDown, Ban, Moon, RefreshCcw, Sun } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Filters } from '../App';
+import { useTheme } from '../contexts/ThemeContext';
 
 type HeaderProps = {
   ref: Ref<HTMLDivElement>;
@@ -14,6 +15,7 @@ type HeaderProps = {
 };
 
 export function Header({ ref, filters, onFiltersChange, reset, onHardReload }: HeaderProps) {
+  const { setTheme, theme, getSystemTheme } = useTheme();
   const handleFilterChange = (filter: Filters[number] | undefined) => {
     if (!filter) {
       onFiltersChange([]);
@@ -119,6 +121,23 @@ export function Header({ ref, filters, onFiltersChange, reset, onHardReload }: H
           <ArrowUpDown size={12} className="text-purple-500" /> _ppas
         </Badge>
       </div>
+      {/* theme toggle */}
+      <Button
+        variant="outline"
+        size="icon"
+        className="ml-auto mr-1 h-5 w-5"
+        onClick={() => {
+          if (theme === 'system') {
+            setTheme(getSystemTheme() === 'light' ? 'dark' : 'light');
+            return;
+          }
+          setTheme(theme === 'light' ? 'dark' : 'light');
+        }}
+      >
+        <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+        <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+        <span className="sr-only">Toggle theme</span>
+      </Button>
     </div>
   );
 }
