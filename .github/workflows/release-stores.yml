@@ -1,0 +1,54 @@
+name: Release stores
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  upload-to-stores:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate release tag matches extension package.json version
+        working-directory: apps/debugger-extension
+        run: |
+          TAG_NAME=${{ github.event.release.tag_name }}
+          PACKAGE_VERSION=$(jq -r .version package.json)
+          if [ "$TAG_NAME" != "$PACKAGE_VERSION" ]; then
+            echo "Error: Release tag ($TAG_NAME) does not match package.json version ($PACKAGE_VERSION)"
+            exit 1
+          fi
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Zip extensions
+        working-directory: apps/debugger-extension
+        run: |
+          pnpm zip
+          pnpm zip:firefox
+
+      - name: Submit to stores
+        run: |
+          pnpm wxt submit --dry-run \
+            --chrome-zip .output/piwik-pro-tracking-helper-*-chrome.zip \
+            --firefox-zip .output/piwik-pro-tracking-helper-*-firefox.zip --firefox-sources-zip .output/piwik-pro-tracking-helper-*-sources.zip
+        env:
+          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+          CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+          CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+          CHROME_PUBLISH_TARGET: ${{ secrets.CHROME_PUBLISH_TARGET }}
+          CHROME_SKIP_SUBMIT_REVIEW: ${{ secrets.CHROME_SKIP_SUBMIT_REVIEW }}
+          FIREFOX_EXTENSION_ID: ${{ secrets.FIREFOX_EXTENSION_ID }}
+          FIREFOX_JWT_ISSUER: ${{ secrets.FIREFOX_JWT_ISSUER }}
+          FIREFOX_JWT_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}
+          FIREFOX_CHANNEL: ${{ secrets.FIREFOX_CHANNEL }}
