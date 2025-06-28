@@ -18,11 +18,16 @@ export function EventDetails({ selectedMessage, onClose }: EventDetailsProps) {
     <div className={cn('h-full overflow-auto text-sm', theme === 'light' && 'bg-slate-100')}>
       <div
         className={cn(
-          'sticky top-0 border-b-2',
-          theme === 'light' ? 'border-slate-300 bg-slate-100' : ''
+          'sticky top-0 border-b-2 border-slate-300',
+          theme === 'light' ? 'bg-slate-100' : 'bg-slate-800'
         )}
       >
-        <Button variant="ghost" className="hover:bg-slate-200" size="icon" onClick={onClose}>
+        <Button
+          variant="ghost"
+          className={theme === 'light' ? 'hover:bg-slate-200' : 'hover:bg-slate-600'}
+          size="icon"
+          onClick={onClose}
+        >
           <XCircle />
         </Button>
       </div>

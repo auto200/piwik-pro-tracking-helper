@@ -56,4 +56,21 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
+
+  /* Scrollbar styling for dark mode */
+  .dark ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+
+  .dark * {
+    scrollbar-color: hsl(var(--border)) hsl(var(--muted));
+  }
 }
