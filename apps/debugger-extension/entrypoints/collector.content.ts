@@ -1,5 +1,6 @@
 import { defineContentScript } from '#imports';
 import { InternalMessage, Message } from '@/lib/messaging';
+import { finder } from '@medv/finder';
 
 // proxy object created when JSTC is loaded
 type _QueueProxy = { push: (args: unknown[]) => void };
@@ -13,7 +14,15 @@ const sendMessage = (msg: Message | InternalMessage) => {
 };
 
 function formatPushArgs(args: any[]) {
-  return args.map((e) => (typeof e === 'function' ? e.toString() : e)) as any;
+  return args.map((e) => {
+    if (typeof e === 'function') {
+      return e.toString();
+    }
+    if (e instanceof Element) {
+      return `Element: ${finder(e)}`;
+    }
+    return e;
+  }) as any;
 }
 
 export default defineContentScript({
