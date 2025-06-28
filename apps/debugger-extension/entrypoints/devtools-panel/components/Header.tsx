@@ -30,6 +30,9 @@ export function Header({ ref, filters, onFiltersChange, reset, onHardReload }: H
     onFiltersChange([...filters, filter]);
   };
 
+  const badgeColor = theme === 'light' ? 'bg-blue-200' : 'bg-slate-700';
+  const badgeHoverColor = theme === 'light' ? 'hover:bg-slate-300' : 'hover:bg-slate-600';
+
   return (
     <div ref={ref} className="flex items-center overflow-hidden p-[2px]">
       <Button
@@ -57,7 +60,7 @@ export function Header({ ref, filters, onFiltersChange, reset, onHardReload }: H
         <Badge
           variant="outline"
           className={cn(
-            filters.length === 0 ? 'bg-blue-200' : 'hover:bg-slate-300',
+            filters.length === 0 ? badgeColor : badgeHoverColor,
             'cursor-pointer'
           )}
           onClick={() => handleFilterChange(undefined)}
@@ -81,7 +84,7 @@ export function Header({ ref, filters, onFiltersChange, reset, onHardReload }: H
         <Badge
           variant="outline"
           className={cn(
-            filters.includes('PAQ_ENTRY') ? 'bg-blue-200' : 'hover:bg-slate-300',
+            filters.includes('PAQ_ENTRY') ? badgeColor : badgeHoverColor,
             'cursor-pointer'
           )}
           onClick={() => handleFilterChange('PAQ_ENTRY')}
@@ -92,7 +95,7 @@ export function Header({ ref, filters, onFiltersChange, reset, onHardReload }: H
         <Badge
           variant="outline"
           className={cn(
-            filters.includes('PAQ_NETWORK_EVENT') ? 'bg-blue-200' : 'hover:bg-slate-300',
+            filters.includes('PAQ_NETWORK_EVENT') ? badgeColor : badgeHoverColor,
             'cursor-pointer'
           )}
           onClick={() => handleFilterChange('PAQ_NETWORK_EVENT')}
@@ -102,7 +105,7 @@ export function Header({ ref, filters, onFiltersChange, reset, onHardReload }: H
         <Badge
           variant="outline"
           className={cn(
-            filters.includes('PPAS_ENTRY') ? 'bg-blue-200' : 'hover:bg-slate-300',
+            filters.includes('PPAS_ENTRY') ? badgeColor : badgeHoverColor,
             'cursor-pointer'
           )}
           onClick={() => handleFilterChange('PPAS_ENTRY')}
@@ -113,7 +116,7 @@ export function Header({ ref, filters, onFiltersChange, reset, onHardReload }: H
         <Badge
           variant="outline"
           className={cn(
-            filters.includes('PPAS_NETWORK_EVENT') ? 'bg-blue-200' : 'hover:bg-slate-300',
+            filters.includes('PPAS_NETWORK_EVENT') ? badgeColor : badgeHoverColor,
             'cursor-pointer'
           )}
           onClick={() => handleFilterChange('PPAS_NETWORK_EVENT')}

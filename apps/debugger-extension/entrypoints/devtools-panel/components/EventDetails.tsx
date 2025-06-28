@@ -4,6 +4,8 @@ import { getEventType } from '@/lib/eventDetector';
 import { XCircle } from 'lucide-react';
 import { Fragment } from 'react';
 import { Entry } from '../eventStore';
+import { useTheme } from '../contexts/ThemeContext';
+import { cn } from '@/lib/utils';
 
 type EventDetailsProps = {
   selectedMessage: Entry;
@@ -11,9 +13,15 @@ type EventDetailsProps = {
 };
 
 export function EventDetails({ selectedMessage, onClose }: EventDetailsProps) {
+  const { theme } = useTheme();
   return (
-    <div className="h-full overflow-auto bg-slate-100 text-sm">
-      <div className="sticky top-0 border-b-2 border-slate-300 bg-slate-100">
+    <div className={cn('h-full overflow-auto text-sm', theme === 'light' && 'bg-slate-100')}>
+      <div
+        className={cn(
+          'sticky top-0 border-b-2',
+          theme === 'light' ? 'border-slate-300 bg-slate-100' : ''
+        )}
+      >
         <Button variant="ghost" className="hover:bg-slate-200" size="icon" onClick={onClose}>
           <XCircle />
         </Button>
@@ -38,6 +46,8 @@ type EventDetailProps = {
   selectedMessage: Entry;
 };
 function EventDetail({ selectedMessage }: EventDetailProps) {
+  const { theme } = useTheme();
+
   switch (selectedMessage.type) {
     case 'PAQ_ENTRY':
     case 'PPAS_ENTRY': {
@@ -85,7 +95,14 @@ function EventDetail({ selectedMessage }: EventDetailProps) {
               <Separator />
               {selectedMessage.payload.params.map((e, i) => (
                 <div key={i} className="flex">
-                  <span className="font-bold text-slate-600">{e.name}: </span>
+                  <span
+                    className={cn(
+                      'font-bold',
+                      theme === 'light' ? 'text-slate-600' : 'text-slate-400'
+                    )}
+                  >
+                    {e.name}:{' '}
+                  </span>
                   <span className="ml-[1ch] break-words">
                     {import.meta.env.CHROME ? decodeURIComponent(e.value) : e.value}
                   </span>

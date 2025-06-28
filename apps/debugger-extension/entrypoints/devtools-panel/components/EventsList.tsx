@@ -11,6 +11,7 @@ import { getEventType, getPingType } from '@/lib/eventDetector';
 import { cn } from '@/lib/utils';
 import { ArrowRight, ArrowUpDown } from 'lucide-react';
 import { Entry } from '../eventStore';
+import { useTheme } from '../contexts/ThemeContext';
 
 type EventsListProps = {
   msgs: Entry[];
@@ -20,10 +21,13 @@ type EventsListProps = {
 };
 
 export function EventsList({ ref, msgs, selectedMessage, setSelectedMessage }: EventsListProps) {
+  const { theme } = useTheme();
   return (
     <div ref={ref} className="h-full overflow-auto">
       <Table>
-        <TableHeader className="sticky top-0 z-10 bg-slate-100">
+        <TableHeader
+          className={cn('sticky top-0 z-10', theme === 'light' ? 'bg-slate-100' : 'bg-slate-800')}
+        >
           <TableRow>
             <TableHead>Event name</TableHead>
             <TableHead>Details</TableHead>
@@ -51,6 +55,10 @@ type EventEntryRowProps = {
 };
 
 function EventEntryRow({ msg, selectedMessage, setSelectedMessage }: EventEntryRowProps) {
+  const { theme } = useTheme();
+  const rowStyles =
+    theme === 'light' ? 'bg-slate-300 hover:bg-slate-300' : 'bg-slate-700 hover:bg-slate-700';
+
   switch (msg.type) {
     case 'JSTC_LOADED_PAQ': {
       return (
@@ -75,9 +83,7 @@ function EventEntryRow({ msg, selectedMessage, setSelectedMessage }: EventEntryR
       return (
         <TableRow
           onClick={() => setSelectedMessage(msg)}
-          className={cn('cursor-default', {
-            'bg-slate-300 hover:bg-slate-300': selectedMessage?.id === msg.id,
-          })}
+          className={cn('cursor-default', selectedMessage?.id === msg.id && rowStyles)}
         >
           <TableCell className="flex items-center gap-1">
             <span>
@@ -121,9 +127,7 @@ function EventEntryRow({ msg, selectedMessage, setSelectedMessage }: EventEntryR
       return (
         <TableRow
           onClick={() => setSelectedMessage(msg)}
-          className={cn('cursor-default', {
-            'bg-slate-300 hover:bg-slate-300': selectedMessage?.id === msg.id,
-          })}
+          className={cn('cursor-default', selectedMessage?.id === msg.id && rowStyles)}
 
           // onClick={() => {
           //   browser.devtools.panels.openResource(
