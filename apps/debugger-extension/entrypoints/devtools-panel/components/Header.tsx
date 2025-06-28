@@ -15,7 +15,7 @@ type HeaderProps = {
 };
 
 export function Header({ ref, filters, onFiltersChange, reset, onHardReload }: HeaderProps) {
-  const { setTheme, theme, getSystemTheme } = useTheme();
+  const { setTheme, theme } = useTheme();
   const handleFilterChange = (filter: Filters[number] | undefined) => {
     if (!filter) {
       onFiltersChange([]);
@@ -59,10 +59,7 @@ export function Header({ ref, filters, onFiltersChange, reset, onHardReload }: H
       <div className="ml-5 flex select-none items-center gap-1">
         <Badge
           variant="outline"
-          className={cn(
-            filters.length === 0 ? badgeColor : badgeHoverColor,
-            'cursor-pointer'
-          )}
+          className={cn(filters.length === 0 ? badgeColor : badgeHoverColor, 'cursor-pointer')}
           onClick={() => handleFilterChange(undefined)}
         >
           <svg
@@ -130,10 +127,6 @@ export function Header({ ref, filters, onFiltersChange, reset, onHardReload }: H
         size="icon"
         className="ml-auto mr-1 h-5 w-5"
         onClick={() => {
-          if (theme === 'system') {
-            setTheme(getSystemTheme() === 'light' ? 'dark' : 'light');
-            return;
-          }
           setTheme(theme === 'light' ? 'dark' : 'light');
         }}
       >

@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useLayoutEffect, useState } from 'react';
 
-type Theme = 'dark' | 'light' | 'system';
+type Theme = 'dark' | 'light';
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -11,7 +11,6 @@ type ThemeProviderProps = {
 type ThemeProviderState = {
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  getSystemTheme: () => Exclude<Theme, 'system'>;
 };
 
 const ThemeProviderContext = createContext<ThemeProviderState>(
@@ -23,25 +22,17 @@ const getSystemTheme = () =>
 
 export function ThemeProvider({
   children,
-  defaultTheme = 'system',
   storageKey = 'vite-ui-theme',
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+    () => (localStorage.getItem(storageKey) as Theme) || getSystemTheme()
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = window.document.documentElement;
 
     root.classList.remove('light', 'dark');
-
-    if (theme === 'system') {
-      const systemTheme = getSystemTheme();
-
-      root.classList.add(systemTheme);
-      return;
-    }
 
     root.classList.add(theme);
   }, [theme]);
@@ -52,7 +43,6 @@ export function ThemeProvider({
       localStorage.setItem(storageKey, theme);
       setTheme(theme);
     },
-    getSystemTheme,
   };
 
   return (
