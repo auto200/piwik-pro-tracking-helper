@@ -37,6 +37,7 @@ jobs:
           pnpm zip:firefox
 
       - name: Submit to stores
+        working-directory: apps/debugger-extension
         run: |
           pnpm wxt submit --dry-run \
             --chrome-zip .output/piwik-pro-tracking-helper-*-chrome.zip \
