@@ -39,7 +39,7 @@ jobs:
       - name: Submit to stores
         working-directory: apps/debugger-extension
         run: |
-          pnpm wxt submit --dry-run \
+          pnpm wxt submit \
             --chrome-zip .output/piwik-pro-tracking-helper-*-chrome.zip \
             --firefox-zip .output/piwik-pro-tracking-helper-*-firefox.zip --firefox-sources-zip .output/piwik-pro-tracking-helper-*-sources.zip
         env:
