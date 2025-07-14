@@ -21,6 +21,16 @@ function formatPushArgs(args: any[]) {
     if (e instanceof Element) {
       return `Element: ${finder(e)}`;
     }
+    if (e instanceof Error) {
+      // https://stackoverflow.com/a/26199752
+      const { fileName, lineNumber, columnNumber, message } = JSON.parse(
+        JSON.stringify(e, Object.getOwnPropertyNames(e))
+      );
+      return {
+        error: message,
+        location: `${fileName}:${lineNumber}:${columnNumber}`,
+      };
+    }
     return e;
   }) as any;
 }
