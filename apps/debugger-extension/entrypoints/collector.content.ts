@@ -78,20 +78,19 @@ export default defineContentScript({
 
             internal_queue = value;
             const originalPush = value.push;
-            value.push = (args) => {
-              if (!Array.isArray(args)) {
-                console.log(`[JSTC DEBUGGER] some invalid value pushed to the ${queueName}`);
-              } else {
+            value.push = (...args) => {
+              for (const arg of args) {
                 sendMessage({
                   type: messageEventType,
                   source: 'JSTC_DBG',
                   payload: {
-                    data: formatPushArgs(args),
+                    data: formatPushArgs(arg),
                     stack: new Error().stack,
                   },
                 });
               }
-              originalPush(args);
+
+              originalPush(...args);
             };
             return;
           }
@@ -114,7 +113,6 @@ export default defineContentScript({
         // Piwik/PPAS object, when that object is defined we are sure that JSTC has loaded
         set: function (value) {
           if (Array.isArray(internal_queue)) {
-            // TODO: send message that JSTC has been initialized
             internal_queue.forEach((args) => {
               if (!Array.isArray(args)) {
                 return;
