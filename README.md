@@ -2,18 +2,28 @@
 
 ### Inspect commands sent to the browser tracker and outgoing network events
 
-![alt text](/docs/preview.png)
+| Browser                            | Install from                                                                                                            |
+| :--------------------------------- | :---------------------------------------------------------------------------------------------------------------------- |
+| <img src="/docs/chrome-logo.png">  | [Chrome Web Store](https://chromewebstore.google.com/detail/piwik-pro-tracking-helper/fkbdlogfdjmpfepbbbjcgcfbgbcfcnne) |
+| <img src="/docs/firefox-logo.png"> | [Firefox Addons](https://addons.mozilla.org/en-US/firefox/addon/piwik-pro-tracking-helper/)                             |
+
+<br/>
+
+![](/docs/preview.png)
 
 - supports both `_paq` and `_ppas` queues
 - easy to recognize event types
 - preview event payload
 
-# Browser support
+# How to use
 
-| Browser name                                                                                                  | Browser version | Status |
-| :------------------------------------------------------------------------------------------------------------ | :-------------- | :----- |
-| [Chrome](https://chromewebstore.google.com/detail/piwik-pro-tracking-helper/fkbdlogfdjmpfepbbbjcgcfbgbcfcnne) | latest          | ✅     |
-| [Firefox](https://addons.mozilla.org/en-US/firefox/addon/piwik-pro-tracking-helper/)                          | latest          | ✅     |
+- install extension
+- open page that has Piwik PRO installed
+- open devtools (reopen if opened before) and click on "Piwik PRO Tracking Helper" tab
+- refresh the page
+- see results in devtools panel
+
+---
 
 # Build the browser extension
 
@@ -39,27 +49,6 @@ cd apps/debugger-extension
 pnpm dev
 # or pnpm dev:firefox
 ```
-
-# How to install
-
-Extension is available through [Firefox add-ons](https://addons.mozilla.org/en-US/firefox/addon/piwik-pro-tracking-helper/) or [Chrome web store](https://chromewebstore.google.com/detail/piwik-pro-tracking-helper/fkbdlogfdjmpfepbbbjcgcfbgbcfcnne)
-
----
-
-OR
-
-Go to [releases](https://github.com/auto200/piwik-pro-tracking-helper/releases) and download latest extension version for firefox or chrome
-
-- chrome - extract zip and [follow instructions](https://webkul.com/blog/how-to-install-the-unpacked-extension-in-chrome/)
-- firefox - [follow instructions](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/)
-
-# How to use
-
-- install extension
-- open page that has Piwik PRO installed
-- open devtools (reopen if opened before) and click on "Piwik PRO Tracking Helper" tab
-- refresh the page
-- see results in devtools panel
 
 ---
 
