@@ -6,6 +6,7 @@ import { Fragment } from 'react';
 import { Entry } from '../eventStore';
 import { useTheme } from '../contexts/ThemeContext';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 type EventDetailsProps = {
   selectedMessage: Entry;
@@ -56,6 +57,45 @@ function EventDetail({ selectedMessage }: EventDetailProps) {
   switch (selectedMessage.type) {
     case 'PAQ_ENTRY':
     case 'PPAS_ENTRY': {
+      if (selectedMessage.payload.type === 'ERROR') {
+        return (
+          <>
+            <div className="font-bold">Invalid input</div>
+            <div>Expected:</div>
+            <div className="ml-2">
+              <Badge>
+                {selectedMessage.type === 'PAQ_ENTRY' ? '_paq' : '_ppas'}
+                .push([&quot;methodName&quot;, ...parameters])
+              </Badge>
+            </div>
+
+            <div>or</div>
+
+            <div className="ml-2">
+              <Badge>
+                {selectedMessage.type === 'PAQ_ENTRY' ? '_paq' : '_ppas'}
+                {'.push([function(){...}])'}
+              </Badge>
+            </div>
+
+            <div>Received:</div>
+
+            <div className="ml-2">
+              <Badge className="bg-red-300">{selectedMessage.payload.stringifiedInput}</Badge>
+            </div>
+
+            <div className="mt-2">
+              <a
+                className="text-blue-400 underline"
+                href="https://developers.piwik.pro/docs/plain-javascript-browser-js-api#methods-used-for-calls"
+              >
+                Piwik PRO Documentation
+              </a>
+            </div>
+          </>
+        );
+      }
+
       return (
         <>
           <div>

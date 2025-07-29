@@ -123,6 +123,29 @@ function EventEntryRow({ msg, selectedMessage, setSelectedMessage }: EventEntryR
     }
     case 'PAQ_ENTRY':
     case 'PPAS_ENTRY': {
+      // NOTE: here we do a lot of repetition in terms of the markup, this should be extracted to
+      // smaller more reusable component
+      if (msg.payload.type === 'ERROR') {
+        return (
+          <TableRow
+            onClick={() => setSelectedMessage(msg)}
+            className={cn('cursor-default', selectedMessage?.id === msg.id && rowStyles)}
+          >
+            <TableCell className="flex items-center gap-1">
+              <span>
+                <ArrowRight
+                  className={`${msg.type === 'PAQ_ENTRY' ? 'text-green-300' : 'text-purple-400'} opacity-80`}
+                  size={18}
+                />
+              </span>
+              {msg.type === 'PAQ_ENTRY' ? '[_paq] ' : '[_ppas] '}
+              <span className="font-bold text-red-500">Invalid input</span>
+            </TableCell>
+            <TableCell>{msg.payload.stringifiedInput}</TableCell>
+          </TableRow>
+        );
+      }
+
       const params = msg.payload.data.slice(1, msg.payload.data.length);
       return (
         <TableRow

@@ -80,14 +80,26 @@ export default defineContentScript({
             const originalPush = value.push;
             value.push = (...args) => {
               for (const arg of args) {
-                sendMessage({
-                  type: messageEventType,
-                  source: 'JSTC_DBG',
-                  payload: {
-                    data: formatPushArgs(arg),
-                    stack: new Error().stack,
-                  },
-                });
+                try {
+                  sendMessage({
+                    type: messageEventType,
+                    source: 'JSTC_DBG',
+                    payload: {
+                      type: 'SUCCESS',
+                      data: formatPushArgs(arg),
+                      stack: new Error().stack,
+                    },
+                  });
+                } catch {
+                  sendMessage({
+                    type: messageEventType,
+                    source: 'JSTC_DBG',
+                    payload: {
+                      type: 'ERROR',
+                      stringifiedInput: JSON.stringify(arg),
+                    },
+                  });
+                }
               }
 
               originalPush(...args);
@@ -112,22 +124,33 @@ export default defineContentScript({
         // First thing that JSTC does after loading and processing the queue is setting global
         // Piwik/PPAS object, when that object is defined we are sure that JSTC has loaded
         set: function (value) {
-          if (Array.isArray(internal_queue)) {
-            internal_queue.forEach((args) => {
-              if (!Array.isArray(args)) {
-                return;
-              }
+          internalObjectName = value;
+
+          if (!Array.isArray(internal_queue)) return;
+          // process the queued up items in native array (not proxy object) that were stored before
+          // JSTC loaded
+          internal_queue.forEach((arg: any) => {
+            try {
               sendMessage({
                 source: 'JSTC_DBG',
                 type: messageEventType,
                 payload: {
-                  data: formatPushArgs(args),
+                  type: 'SUCCESS',
+                  data: formatPushArgs(arg),
                   stack: new Error().stack,
                 },
               });
-            });
-          }
-          internalObjectName = value;
+            } catch {
+              sendMessage({
+                source: 'JSTC_DBG',
+                type: messageEventType,
+                payload: {
+                  type: 'ERROR',
+                  stringifiedInput: JSON.stringify(arg),
+                },
+              });
+            }
+          });
         },
         get: function () {
           return internalObjectName;

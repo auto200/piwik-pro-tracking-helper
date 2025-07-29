@@ -4,7 +4,9 @@ export type Message =
   | {
       type: 'PAQ_ENTRY' | 'PPAS_ENTRY';
       source: 'JSTC_DBG';
-      payload: { data: [string, ...unknown[]]; stack: string | undefined };
+      payload:
+        | { type: 'SUCCESS'; data: [string, ...unknown[]]; stack: string | undefined }
+        | { type: 'ERROR'; stringifiedInput: string };
     }
   | {
       type: 'PAQ_NETWORK_EVENT' | 'PPAS_NETWORK_EVENT';

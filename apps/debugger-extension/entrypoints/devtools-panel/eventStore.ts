@@ -78,10 +78,13 @@ onMessage('JSTC_EVENT', function ({ data: msg }) {
 
   if (msg.type !== 'PAQ_ENTRY' && msg.type !== 'PPAS_ENTRY') return;
 
+  if (msg.payload.type === 'ERROR') return;
+
   const [name, trackerUrl] = msg.payload.data;
   if (name !== 'setTrackerUrl') return;
   if (typeof trackerUrl !== 'string') return;
 
+  // TODO: extract parsing url to separate function and add tests
   let parsedUrl = '';
 
   if (trackerUrl.startsWith('//')) {
