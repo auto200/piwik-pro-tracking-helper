@@ -1,6 +1,7 @@
 import { Message } from '@/lib/messaging';
 import { browser } from 'wxt/browser';
 import { onMessage } from 'webext-bridge/devtools';
+import { Browser } from '#imports';
 
 export type Entry = Message & { id: string };
 
@@ -12,7 +13,7 @@ let pageOrigin = '';
 const _paqTrackingEndpoints: string[] = [];
 const _ppasTrackingEndpoints: string[] = [];
 
-function paqNetworkHandler(request: any) {
+function paqNetworkHandler(request: Browser.devtools.network.Request) {
   const msg = _paqTrackingEndpoints.includes(request.request.url)
     ? getNetworkEntry(request, 'PAQ_NETWORK_EVENT')
     : undefined;
@@ -142,10 +143,10 @@ function emitChange() {
 }
 
 function getNetworkEntry(
-  request: any,
+  request: Browser.devtools.network.Request,
   eventType: 'PAQ_NETWORK_EVENT' | 'PPAS_NETWORK_EVENT'
 ): Entry {
-  const isBatchRequest = request.request.postData?.text.startsWith('{"requests":[');
+  const isBatchRequest = request.request.postData?.text?.startsWith('{"requests":[');
 
   if (isBatchRequest) {
     return {
