@@ -1,6 +1,7 @@
 import { Message } from '@/lib/messaging';
-import { browser } from 'wxt/browser';
 import { onMessage } from 'webext-bridge/devtools';
+import { browser, Browser } from '#imports';
+import { QueryParam } from '@/lib/types';
 
 export type Entry = Message & { id: string };
 
@@ -12,7 +13,7 @@ let pageOrigin = '';
 const _paqTrackingEndpoints: string[] = [];
 const _ppasTrackingEndpoints: string[] = [];
 
-function paqNetworkHandler(request: any) {
+function paqNetworkHandler(request: Browser.devtools.network.Request) {
   const msg = _paqTrackingEndpoints.includes(request.request.url)
     ? getNetworkEntry(request, 'PAQ_NETWORK_EVENT')
     : undefined;
@@ -21,7 +22,7 @@ function paqNetworkHandler(request: any) {
     emitChange();
   }
 }
-function ppasNetworkHandler(request: any) {
+function ppasNetworkHandler(request: Browser.devtools.network.Request) {
   const msg = _ppasTrackingEndpoints.includes(request.request.url)
     ? getNetworkEntry(request, 'PPAS_NETWORK_EVENT')
     : undefined;
@@ -111,9 +112,9 @@ onMessage('JSTC_EVENT', function ({ data: msg }) {
   return;
 });
 
-const allRequests: any[] = [];
+const allRequests: Browser.devtools.network.Request[] = [];
 
-browser.devtools.network.onRequestFinished.addListener((request: any) => {
+browser.devtools.network.onRequestFinished.addListener((request) => {
   allRequests.push(request);
 });
 
@@ -142,10 +143,10 @@ function emitChange() {
 }
 
 function getNetworkEntry(
-  request: any,
+  request: Browser.devtools.network.Request,
   eventType: 'PAQ_NETWORK_EVENT' | 'PPAS_NETWORK_EVENT'
 ): Entry {
-  const isBatchRequest = request.request.postData?.text.startsWith('{"requests":[');
+  const isBatchRequest = request.request.postData?.text?.startsWith('{"requests":[');
 
   if (isBatchRequest) {
     return {
@@ -154,8 +155,8 @@ function getNetworkEntry(
       payload: {
         type: 'BATCH',
         url: request.request.url,
-        requestsParams: (JSON.parse(request.request.postData?.text).requests as string[]).map((r) =>
-          [...new URLSearchParams(r).entries()].map(([name, value]) => ({ name, value }))
+        requestsParams: (JSON.parse(request.request.postData!.text!).requests as string[]).map(
+          (r) => [...new URLSearchParams(r).entries()].map(([name, value]) => ({ name, value }))
         ),
       },
       id: crypto.randomUUID(),
@@ -167,7 +168,8 @@ function getNetworkEntry(
       payload: {
         type: 'SINGLE',
         url: request.request.url,
-        params: request.request.postData?.params ?? [],
+        // this would probably break if the url has multiple query params with the same name
+        params: (request.request.postData?.params as QueryParam[] | undefined) ?? [],
       },
       id: crypto.randomUUID(),
     };
