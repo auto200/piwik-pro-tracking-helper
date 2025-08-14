@@ -7,6 +7,7 @@ import { Entry } from '../eventStore';
 import { useTheme } from '../contexts/ThemeContext';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { PARAMETER_DESCRIPTION, type ParameterName } from '../data/parameterDescription';
 
 type EventDetailsProps = {
   selectedMessage: Entry;
@@ -145,6 +146,11 @@ function EventDetail({ selectedMessage }: EventDetailProps) {
                       'font-bold',
                       theme === 'light' ? 'text-slate-600' : 'text-slate-400'
                     )}
+                    title={
+                      PARAMETER_DESCRIPTION[e.name as ParameterName] ||
+                      (e.name.startsWith('dimension') && PARAMETER_DESCRIPTION['dimensionID']) ||
+                      ''
+                    }
                   >
                     {e.name}:{' '}
                   </span>
