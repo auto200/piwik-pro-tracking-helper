@@ -8,6 +8,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { PARAMETER_DESCRIPTION, type ParameterName } from '../data/parameterDescription';
+import { QueryParam } from '@/lib/types';
 
 type EventDetailsProps = {
   selectedMessage: Entry;
@@ -53,8 +54,6 @@ type EventDetailProps = {
   selectedMessage: Entry;
 };
 function EventDetail({ selectedMessage }: EventDetailProps) {
-  const { theme } = useTheme();
-
   switch (selectedMessage.type) {
     case 'PAQ_ENTRY':
     case 'PPAS_ENTRY': {
@@ -126,63 +125,12 @@ function EventDetail({ selectedMessage }: EventDetailProps) {
     case 'PAQ_NETWORK_EVENT':
     case 'PPAS_NETWORK_EVENT': {
       if (selectedMessage.payload.type === 'SINGLE') {
-        const eventType = getEventType(selectedMessage.payload.params);
-        return (
-          <div>
-            Network event: <span className="font-bold">{eventType}</span>
-            {eventType === 'Broken Event' && selectedMessage.payload.params.length == 0 && (
-              <div className="mt-2 font-bold">
-                This may be Last heartbeat ping, these are currently not supported and displayed as
-                broken events.
-              </div>
-            )}
-            <div className="mt-2">
-              <b>Parameters:</b>
-              <Separator />
-              {selectedMessage.payload.params.map((e, i) => (
-                <div key={i} className="flex">
-                  <span
-                    className={cn(
-                      'font-bold',
-                      theme === 'light' ? 'text-slate-600' : 'text-slate-400'
-                    )}
-                    title={
-                      PARAMETER_DESCRIPTION[e.name as ParameterName] ||
-                      (e.name.startsWith('dimension') && PARAMETER_DESCRIPTION['dimensionID']) ||
-                      ''
-                    }
-                  >
-                    {e.name}:{' '}
-                  </span>
-                  <span className="ml-[1ch] break-words">
-                    {import.meta.env.CHROME ? decodeURIComponent(e.value) : e.value}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
+        return <NetworkEvent eventParams={selectedMessage.payload.params} />;
       } else {
         return selectedMessage.payload.requestsParams.map((params, i) => {
-          const eventType = getEventType(params);
           return (
             <Fragment key={i}>
-              <div>
-                network event: <span className="font-bold">{eventType}</span>
-                {eventType === 'Broken Event' && params.length == 0 && (
-                  <div className="mt-2 font-bold">
-                    This may be Last heartbeat ping, these are currently not supported and displayed
-                    as broken events.
-                  </div>
-                )}
-                <div>
-                  {params.map((e, i) => (
-                    <div key={i}>
-                      {e.name}: <span className="font-bold">{e.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <NetworkEvent eventParams={params} />
               <Separator className="my-3" />
             </Fragment>
           );
@@ -193,4 +141,43 @@ function EventDetail({ selectedMessage }: EventDetailProps) {
       return null;
     }
   }
+}
+
+function NetworkEvent({ eventParams }: { eventParams: QueryParam[] }) {
+  const { theme } = useTheme();
+
+  const eventType = getEventType(eventParams);
+
+  return (
+    <div>
+      Network event: <span className="font-bold">{eventType}</span>
+      {eventType === 'Broken Event' && eventParams.length == 0 && (
+        <div className="mt-2 font-bold">
+          This may be Last heartbeat ping, these are currently not supported and displayed as broken
+          events.
+        </div>
+      )}
+      <div className="mt-2">
+        <b>Parameters:</b>
+        <Separator />
+        {eventParams.map((e, i) => (
+          <div key={i} className="flex">
+            <span
+              className={cn('font-bold', theme === 'light' ? 'text-slate-600' : 'text-slate-400')}
+              title={
+                PARAMETER_DESCRIPTION[e.name as ParameterName] ||
+                (e.name.startsWith('dimension') && PARAMETER_DESCRIPTION['dimensionID']) ||
+                ''
+              }
+            >
+              {e.name}:{' '}
+            </span>
+            <span className="ml-[1ch] break-words">
+              {import.meta.env.CHROME ? decodeURIComponent(e.value) : e.value}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
